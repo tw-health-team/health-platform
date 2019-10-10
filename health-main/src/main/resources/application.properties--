@@ -1,0 +1,17 @@
+# Mysql DATABASE CONFIG
+spring.datasource.driverClassName = com.mysql.cj.jdbc.Driver
+spring.datasource.url = jdbc:mysql://localhost:3306/health?useUnicode=yes&characterEncoding=UTF8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+spring.datasource.username = root
+spring.datasource.password = Power123
+spring.datasource.hikari.max-lifetime=1765000
+spring.datasource.hikari.maximum-pool-size=15
+
+#MyBatis Mapper ����Ӧ�� XML �ļ�λ��
+mybatis.mapper-locations = classpath*:mybatis/*.xml,classpath*:mybatis/*/*.xml
+#MyBaits ������ɨ��·�������package�ö��Ż��߷ֺŷָ�
+mybatis.type-aliases-package = com.theus.health.*.model.po
+
+logging.config=classpath:log/logback-spring.xml
+
+#����swagger�Ƿ���
+swagger.enabled=true

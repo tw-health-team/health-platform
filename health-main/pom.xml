@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>health</artifactId>
+        <groupId>com.theus</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>health-main</artifactId>
+    <!-- 打包方式 -->
+    <packaging>war</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.theus</groupId>
+            <artifactId>health-base</artifactId>
+        </dependency>
+    </dependencies>
+
+    <!-- 动态选择配置文件 -->
+    <!--<profiles>-->
+        <!--<profile>-->
+            <!--&lt;!&ndash; 本地开发环境 &ndash;&gt;-->
+            <!--<id>dev</id>-->
+            <!--<properties>-->
+                <!--<profile.env>dev</profile.env>-->
+            <!--</properties>-->
+            <!--<activation>-->
+                <!--&lt;!&ndash; 设置默认激活这个配置 &ndash;&gt;-->
+                <!--<activeByDefault>true</activeByDefault>-->
+            <!--</activation>-->
+        <!--</profile>-->
+        <!--<profile>-->
+            <!--&lt;!&ndash; 发布环境 &ndash;&gt;-->
+            <!--<id>release</id>-->
+            <!--<properties>-->
+                <!--<profile.env>release</profile.env>-->
+            <!--</properties>-->
+        <!--</profile>-->
+        <!--<profile>-->
+            <!--&lt;!&ndash; 测试环境 &ndash;&gt;-->
+            <!--<id>beta</id>-->
+            <!--<properties>-->
+                <!--<profiles.active>beta</profiles.active>-->
+            <!--</properties>-->
+        <!--</profile>-->
+    <!--</profiles>-->
+
+    <!-- 打包后名称 -->
+    <build>
+        <finalName>health</finalName>
+    </build>
+</project>

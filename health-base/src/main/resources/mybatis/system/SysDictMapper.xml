@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.theus.health.base.mapper.system.SysDictMapper">
+
+    <select id="findPage" resultType="com.theus.health.base.model.po.system.SysDict">
+        select u.*
+        from sys_dict u
+        WHERE 1=1
+        <if test="param.name != null and param.name != '' ">
+            and u.description like '%'+#{param.name}+'%'
+        </if>
+    </select>
+
+</mapper>

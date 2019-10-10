@@ -1,0 +1,70 @@
+server:
+  port: 8088
+
+#================================================= spring start =======================================================
+spring:
+#  # Mysql DATABASE CONFIG
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/health?useUnicode=yes&characterEncoding=UTF8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+#    username: root
+#    password: Power123
+#    hikari:
+#      max-lifetime: 1765000
+#      maximum-pool-size: 15
+  # Sqlserver DATABASE CONFIG
+  datasource:
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: jdbc:sqlserver://localhost\SQL2008;database=health
+    username: sa
+    password: Power123
+    hikari:
+      max-lifetime: 1765000
+      maximum-pool-size: 15
+  aop:
+    proxy-target-class: true
+    auto: true
+  redis:
+    host: localhost
+    port: 6379
+    password: 123456
+    timeout: 10000
+#================================================= spring end =========================================================
+
+#================================================= mybatis-plus start =================================================
+mybatis-plus:
+  # config-location:
+  # MyBatis Mapper 所对应的 XML 文件位置
+  mapper-locations: classpath*:mybatis/*.xml,classpath*:mybatis/*/*.xml
+  # MyBaits 别名包扫描路径，多个package用逗号或者分号分隔
+  type-aliases-package: com.theus.health.*.entity.*
+  configuration:
+    # 是否开启自动驼峰命名规则（camel case）映射，
+    # 即从经典数据库列名 A_COLUMN（下划线命名） 到经典 Java 属性名 aColumn（驼峰命名） 的类似映射
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    # 指定当结果集中值为 null 的时候是否调用映射对象的 Setter（Map 对象时为 put）方法，
+    # 通常运用于有 Map.keySet() 依赖或 null 值初始化的情况
+    call-setters-on-nulls: true
+  global-config:
+    # 是否控制台 print mybatis-plus 的 LOGO
+    banner: false
+    # 数据库相关配置
+    db-config:
+      # 主键类型  AUTO:"数据库ID自增", INPUT:"用户输入ID",ID_WORKER:"全局唯一ID (数字类型唯一ID)", UUID:"全局唯一ID UUID";
+      id-type: ID_WORKER_STR
+      # 是否开启大写命名，默认不开启
+      capital-mode: true
+      # 逻辑已删除值
+      logic-delete-value: 1
+      # 逻辑未删除值
+      logic-not-delete-value: 0
+#================================================= mybatis-plus end ===================================================
+
+logging:
+  #path : D:/logs
+  config: classpath:log/logback-spring.xml
+
+swagger:
+  # 配置swagger功能是否开启
+  enabled: true
