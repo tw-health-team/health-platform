@@ -21,7 +21,7 @@ public interface SysDictService extends IService<SysDict> {
     IPage<SysDict> findPage(FindDictDTO findDictDTO);
 
     /**
-     * 根据名称查询
+     * 根据名称查询--3333
      * @param label 字典项名称
      * @return 字典信息
      */
