@@ -12,5 +12,5 @@ spring:
 mybatis:
   #MyBatis Mapper 所对应的 XML 文件位置
   mapper-locations : classpath*:mybatis/*.xml,classpath*:mybatis/*/*.xml
-  #MyBaits 别名包扫描路径，多个package用逗号或者分号分     隔
+  #MyBaits 别名包扫描路径，多个package用逗号或者分号分隔
   typeAliasesPackage: com.theus.health.*.model.po
