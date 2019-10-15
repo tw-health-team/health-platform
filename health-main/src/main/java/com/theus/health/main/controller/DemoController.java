@@ -25,6 +25,7 @@ public class DemoController {
 
     @GetMapping("test2")
     public String test2() {
+        // test
         return "hello world";
     }
 }
