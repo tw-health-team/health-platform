@@ -20,11 +20,14 @@ public class DemoController {
 
     @GetMapping("test")
     public String test() {
+        //ces34
+        //测试
         return demoService.test();
     }
 
     @GetMapping("test2")
     public String test2() {
+        // test
         return "hello world";
     }
 }
