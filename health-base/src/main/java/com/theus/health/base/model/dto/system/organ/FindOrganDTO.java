@@ -1,4 +1,4 @@
-package com.theus.health.base.model.dto.system.dept;
+package com.theus.health.base.model.dto.system.organ;
 
 import lombok.Data;
 
@@ -7,7 +7,7 @@ import lombok.Data;
  * @date 2019-10-04 21:52
  */
 @Data
-public class FindDeptDTO {
+public class FindOrganDTO {
 
     private String name;
 }

@@ -23,6 +23,7 @@ import com.theus.health.base.service.system.SysRoleService;
 import com.theus.health.base.service.system.SysUserRoleService;
 import com.theus.health.base.service.system.SysUserService;
 import com.theus.health.base.util.LoginUtil;
+import com.theus.health.base.util.ShiroUtils;
 import com.theus.health.core.bean.ResponseCode;
 import com.theus.health.core.exception.BusinessException;
 import com.theus.health.core.util.Encrypt;
@@ -190,8 +191,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         if (user == null) {
             throw BusinessException.fail("用户不存在");
         }
-        SysUser sysUser = new SysUser();
-        BeanUtils.copyProperties(SecurityUtils.getSubject().getPrincipal(), sysUser);
+        SysUser sysUser = ShiroUtils.getUser();
         if (user.getName().equals(sysUser.getName())) {
             throw BusinessException.fail("不能锁定自己的账户");
         }
@@ -214,8 +214,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         if (user == null) {
             throw BusinessException.fail("用户不存在！");
         }
-        SysUser sysUser = new SysUser();
-        BeanUtils.copyProperties(SecurityUtils.getSubject().getPrincipal(), sysUser);
+        SysUser sysUser = ShiroUtils.getUser();
         if (user.getName().equals(sysUser.getName())) {
             throw BusinessException.fail("不能删除自己的账户！");
         }

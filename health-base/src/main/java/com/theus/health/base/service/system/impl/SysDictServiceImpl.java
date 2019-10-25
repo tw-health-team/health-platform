@@ -6,10 +6,13 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.theus.health.base.mapper.system.SysDictMapper;
 import com.theus.health.base.model.dto.system.dict.FindDictDTO;
+import com.theus.health.base.model.dto.system.dict.SysDictDTO;
 import com.theus.health.base.model.po.system.SysDict;
 import com.theus.health.base.service.system.SysDictService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,5 +33,21 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
     @Override
     public List<SysDict> findByLabel(String label) {
         return this.baseMapper.selectList(new QueryWrapper<SysDict>().eq("label", label));
+    }
+
+    @Override
+    public List<SysDictDTO> findByType(String type) {
+        List<SysDict> sysDictList = this.baseMapper.selectList(
+                new QueryWrapper<SysDict>()
+                        .eq("type", type)
+                        .select("type","value","label")
+                        .orderByAsc("sort"));
+        List<SysDictDTO> sysDictDTOS = new ArrayList<>();
+        sysDictList.forEach(v->{
+            SysDictDTO sysDictDTO = new SysDictDTO();
+            BeanUtils.copyProperties(v, sysDictDTO);
+            sysDictDTOS.add(sysDictDTO);
+        });
+        return sysDictDTOS;
     }
 }
