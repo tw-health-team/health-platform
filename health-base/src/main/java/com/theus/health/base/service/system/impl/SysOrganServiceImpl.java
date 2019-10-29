@@ -29,13 +29,22 @@ import java.util.List;
 public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> implements SysOrganService {
 
     @Override
-    public SysOrgan findDeptByName(String name) {
+    public SysOrgan findById(String id) {
+        return this.getOne(new QueryWrapper<SysOrgan>().eq("id", id));
+    }
+
+    @Override
+    public SysOrgan findByName(String name) {
         return this.getOne(new QueryWrapper<SysOrgan>().eq("name", name));
     }
 
     @Override
     public void add(OrganAddDTO addDTO) {
-        SysOrgan findDept = this.findDeptByName(addDTO.getName());
+        SysOrgan findDept = this.findById(addDTO.getId());
+        if (findDept != null) {
+            throw BusinessException.fail(String.format("已经存在机构ID为 %s 的机构", addDTO.getId()));
+        }
+        findDept = this.findByName(addDTO.getName());
         if (findDept != null) {
             throw BusinessException.fail(String.format("已经存在机构名为 %s 的机构", addDTO.getName()));
         }

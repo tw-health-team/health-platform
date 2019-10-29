@@ -15,11 +15,18 @@ import java.util.List;
 public interface SysOrganService extends IService<SysOrgan> {
 
     /**
+     * 根据机构ID查找机构
+     * @param name 机构名
+     * @return 机构信息
+     */
+    SysOrgan findById(String name);
+
+    /**
      * 根据机构名称查找机构
      * @param name 机构名
      * @return 机构信息
      */
-    SysOrgan findDeptByName(String name);
+    SysOrgan findByName(String name);
 
     /**
      * 添加机构
