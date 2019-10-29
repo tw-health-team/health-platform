@@ -11,4 +11,8 @@ public interface SysConstants {
      */
     String ADMIN = "admin";
 
+    /**
+     * 顶级机构代码
+     */
+    String TOP_DEPT_CODE = "0";
 }

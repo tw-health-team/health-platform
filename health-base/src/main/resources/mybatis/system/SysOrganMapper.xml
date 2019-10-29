@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.theus.health.base.mapper.system.SysOrganMapper">
+
+    <select id="list" resultType="com.theus.health.base.model.po.system.SysOrgan">
+        select a.*, (select b.name from sys_organ b where b.id = a.parent_id) parentName,
+            (SELECT c.label FROM sys_dict c WHERE c.[type]='1001' AND c.[value]=a.level_code) levelName,
+            (SELECT c.label FROM sys_dict c WHERE c.[type]='1002' AND c.[value]=a.classification_code) classificationName
+        from sys_organ a
+        WHERE 1=1
+        <if test="organ.name != null and organ.name != '' ">
+            and (a.name like '%'+#{organ.name}+'%'
+                   or a.short_name like '%'+#{organ.name}+'%'
+                   or a.simple_spelling like '%'+#{organ.name}+'%')
+        </if>
+    </select>
+
+</mapper>

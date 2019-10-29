@@ -71,4 +71,12 @@ public class SysDictController {
 	public ResponseResult findByLabel(@RequestParam String label) {
 		return ResponseResult.e(ResponseCode.OK,sysDictService.findByLabel(label));
 	}
+
+	@GetMapping(value="/findByType/{type}")
+	@ApiOperation(value = "根据字典分类获取字典信息")
+	@SysLogs("根据字典分类获取字典信息")
+	@ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
+	public ResponseResult findByType(@PathVariable("type") @ApiParam("字典分类") String type) {
+		return ResponseResult.e(ResponseCode.OK,sysDictService.findByType(type));
+	}
 }

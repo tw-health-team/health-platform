@@ -1,10 +1,10 @@
 package com.theus.health.base.controller.system;
 
 import com.theus.health.base.common.annotation.SysLogs;
-import com.theus.health.base.model.dto.system.dept.DeptAddDTO;
-import com.theus.health.base.model.dto.system.dept.DeptUpdateDTO;
-import com.theus.health.base.model.dto.system.dept.FindDeptDTO;
-import com.theus.health.base.service.system.SysDeptService;
+import com.theus.health.base.model.dto.system.organ.OrganAddDTO;
+import com.theus.health.base.model.dto.system.organ.OrganUpdateDTO;
+import com.theus.health.base.model.dto.system.organ.FindOrganDTO;
+import com.theus.health.base.service.system.SysOrganService;
 import com.theus.health.core.bean.ResponseCode;
 import com.theus.health.core.bean.ResponseResult;
 import io.swagger.annotations.Api;
@@ -24,18 +24,18 @@ import java.util.List;
  */
 @Api(tags = {"机构管理"})
 @RestController
-@RequestMapping("/system/dept")
-public class SysDeptController {
+@RequestMapping("/system/organ")
+public class SysOrganController {
 
 	@Resource
-	private SysDeptService sysDeptService;
+	private SysOrganService sysOrganService;
 
 	@PostMapping(value = {"/get/id/{id}"})
 	@ApiOperation(value = "根据ID获取机构信息")
 	@SysLogs("根据ID获取机构信息")
 	@ApiImplicitParam(paramType = "header", name = "Authorization", value = "身份认证Token")
-	public ResponseResult getDept(@PathVariable("id") @ApiParam(value = "机构ID") String id) {
-		return ResponseResult.e(ResponseCode.OK,sysDeptService.getById(id));
+	public ResponseResult getOrgan(@PathVariable("id") @ApiParam(value = "机构ID") String id) {
+		return ResponseResult.e(ResponseCode.OK,sysOrganService.getById(id));
 	}
 
 	@PostMapping("/remove")
@@ -43,7 +43,7 @@ public class SysDeptController {
 	@SysLogs("批量删除")
 	@ApiImplicitParam(paramType = "header", name = "Authorization", value = "身份认证Token")
 	public ResponseResult removeList(@RequestBody @ApiParam("ID集合") List<String> idList) {
-		sysDeptService.removeByIds(idList);
+		sysOrganService.removeByIds(idList);
 		return ResponseResult.e(ResponseCode.OK);
 	}
 
@@ -51,8 +51,8 @@ public class SysDeptController {
 	@ApiOperation(value = "添加机构")
 	@SysLogs("添加用户")
 	@ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-	public ResponseResult add(@RequestBody @Validated @ApiParam(value = "机构数据") DeptAddDTO addDTO){
-		sysDeptService.add(addDTO);
+	public ResponseResult add(@RequestBody @Validated @ApiParam(value = "机构数据") OrganAddDTO addDTO){
+		sysOrganService.add(addDTO);
 		return ResponseResult.e(ResponseCode.OK);
 	}
 
@@ -61,8 +61,8 @@ public class SysDeptController {
 	@SysLogs("更新机构")
 	@ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
 	public ResponseResult update(@PathVariable("id") @ApiParam(value = "机构标识ID") String id,
-								 @RequestBody @Validated @ApiParam(value = "机构数据") DeptUpdateDTO updateDTO){
-		sysDeptService.update(id,updateDTO);
+								 @RequestBody @Validated @ApiParam(value = "机构数据") OrganUpdateDTO updateDTO){
+		sysOrganService.update(id,updateDTO);
 		return ResponseResult.e(ResponseCode.OK);
 	}
 
@@ -71,14 +71,14 @@ public class SysDeptController {
 	@SysLogs("查询机构树")
 	@ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
 	public ResponseResult findTree() {
-		return ResponseResult.e(ResponseCode.OK,sysDeptService.findTree(new FindDeptDTO()));
+		return ResponseResult.e(ResponseCode.OK,sysOrganService.findTree(new FindOrganDTO()));
 	}
 
 	@PostMapping(value="/list")
 	@ApiOperation(value = "查询机构列表")
 	@SysLogs("查询机构列表")
 	@ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-	public ResponseResult list(@RequestBody @Validated @ApiParam(value = "机构获取过滤条件") FindDeptDTO findDeptDTO) {
-		return ResponseResult.e(ResponseCode.OK,sysDeptService.findTree(findDeptDTO));
+	public ResponseResult list(@RequestBody @Validated @ApiParam(value = "机构获取过滤条件") FindOrganDTO findDeptDTO) {
+		return ResponseResult.e(ResponseCode.OK,sysOrganService.findTree(findDeptDTO));
 	}
 }

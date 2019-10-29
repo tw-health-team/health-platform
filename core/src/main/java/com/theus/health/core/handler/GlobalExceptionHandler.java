@@ -1,5 +1,6 @@
 package com.theus.health.core.handler;
 
+import com.microsoft.sqlserver.jdbc.SQLServerException;
 import com.theus.health.core.bean.ResponseCode;
 import com.theus.health.core.bean.ResponseResult;
 import com.theus.health.core.exception.BusinessException;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -96,9 +98,15 @@ public class GlobalExceptionHandler {
         return ResponseResult.builder().status(ResponseCode.FAIL.code).msg(msg).build();
     }
 
+    /**
+     * 当尝试插入或更新数据导致违反完整性约束时引发异常
+     * @param e 异常
+     * @return 结果
+     */
     @ExceptionHandler(value = DataIntegrityViolationException.class)
     @ResponseBody
     public ResponseResult requestExceptionHandler(DataIntegrityViolationException e) {
+        LOGGER.error(e.getMessage(), e);
         String msg = "数据操作格式异常：";
         if (e.getCause() != null) {
             msg += e.getCause().getMessage();

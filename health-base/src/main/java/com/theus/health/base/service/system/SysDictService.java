@@ -3,6 +3,7 @@ package com.theus.health.base.service.system;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.theus.health.base.model.dto.system.dict.FindDictDTO;
+import com.theus.health.base.model.dto.system.dict.SysDictDTO;
 import com.theus.health.base.model.po.system.SysDict;
 
 import java.util.List;
@@ -26,4 +27,11 @@ public interface SysDictService extends IService<SysDict> {
      * @return 字典信息
      */
     List<SysDict> findByLabel(String label);
+
+    /**
+     * 根据分类查询
+     * @param type 字典分类
+     * @return 字典信息
+     */
+    List<SysDictDTO> findByType(String type);
 }
