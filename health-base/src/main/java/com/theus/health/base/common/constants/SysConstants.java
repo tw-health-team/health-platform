@@ -15,4 +15,9 @@ public interface SysConstants {
      * 顶级机构代码
      */
     String TOP_DEPT_CODE = "0";
+
+    /**
+     * 通用顶级代码
+     */
+    String TOP_COMMON_CODE = "0";
 }

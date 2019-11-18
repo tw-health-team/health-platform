@@ -2,13 +2,117 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.theus.health.base.mapper.system.SysDictMapper">
 
-    <select id="findPage" resultType="com.theus.health.base.model.po.system.SysDict">
+    <select id="findList" resultType="com.theus.health.base.model.po.system.SysDict">
         select u.*
         from sys_dict u
+        WHERE 1=1 and u.class_code = #{param.classCode}
+        <if test="param.searchText != null and param.searchText != '' ">
+            and (u.item_name like '%'+#{param.searchText}+'%'
+            or u.simple_spelling like '%'+#{param.searchText}+'%')
+        </if>
+        order by u.sort
+    </select>
+
+    <select id="findAllDictClasses" resultType="com.theus.health.base.model.po.system.SysDictClass">
+        select a.*
+        from sys_dict_class a
         WHERE 1=1
-        <if test="param.name != null and param.name != '' ">
-            and u.description like '%'+#{param.name}+'%'
+        order by a.sort
+    </select>
+
+    <select id="findDictClassList" resultType="com.theus.health.base.model.po.system.SysDictClass">
+        select a.*
+        from sys_dict_class a
+        WHERE 1=1
+        <if test="param.searchText != null and param.searchText != '' ">
+            and (a.name like '%'+#{param.searchText}+'%'
+            or a.simple_spelling like '%'+#{param.searchText}+'%')
+        </if>
+        order by a.sort
+    </select>
+
+    <select id="existsDict" resultType="java.lang.Integer">
+        select count(1)
+        from sys_dict a
+        WHERE 1=1
+        <choose>
+            <when test="dict.itemName!=null and dict.itemName!='' and dict.itemValue!=null and dict.itemValue!='' ">
+                and (a.item_name = #{dict.itemName} or a.item_value = #{dict.itemValue})
+            </when>
+            <when test="dict.itemName!=null and dict.itemName!='' ">
+                and a.item_name = #{dict.itemName}
+            </when>
+            <when test="dict.itemValue!=null and dict.itemValue!='' ">
+                and a.item_value = #{dict.itemValue}
+            </when>
+        </choose>
+        <if test="dict.classCode!=null and dict.classCode!='' ">
+            and a.class_code = #{dict.classCode}
+        </if>
+        <if test="dict.id!=null and dict.id!='' ">
+            and a.id != #{dict.id}
         </if>
     </select>
 
+    <select id="existsDictClass" resultType="java.lang.Integer">
+        select count(1)
+        from sys_dict_class a
+        WHERE 1=1
+        <choose>
+            <when test="dictClass.name!=null and dictClass.name!='' and dictClass.code!=null and dictClass.code!='' ">
+                and (a.name = #{dictClass.name} or a.code = #{dictClass.code})
+            </when>
+            <when test="dictClass.name!=null and dictClass.name!='' ">
+                and a.name = #{dictClass.name}
+            </when>
+            <when test="dictClass.code!=null and dictClass.code!='' ">
+                and a.code = #{dictClass.code}
+            </when>
+        </choose>
+        <if test="dictClass.id!=null and dictClass.id!='' ">
+            and a.id != #{dictClass.id}
+        </if>
+    </select>
+
+    <insert id="insertDictClass" parameterType="com.theus.health.base.model.po.system.SysDictClass">
+        insert into sys_dict_class (id, parent_id, code, name, simple_spelling, sort, remarks)
+        values (#{id,jdbcType=VARCHAR}, #{parentId,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR},
+                #{name,jdbcType=NVARCHAR}, #{simpleSpelling,jdbcType=NVARCHAR}, #{sort,jdbcType=INTEGER},
+                #{remarks,jdbcType=NVARCHAR})
+    </insert>
+
+    <update id="updateDictClass" parameterType="com.theus.health.base.model.po.system.SysDictClass">
+        update sys_dict_class
+        <set>
+            <if test="parentId != null">
+                parent_id = #{parentId,jdbcType=VARCHAR},
+            </if>
+            <if test="code != null">
+                code = #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                name = #{name,jdbcType=NVARCHAR},
+            </if>
+            <if test="simpleSpelling != null">
+                simple_spelling = #{simpleSpelling,jdbcType=NVARCHAR},
+            </if>
+            <if test="sort != null">
+                sort = #{sort,jdbcType=INTEGER},
+            </if>
+            <if test="remarks != null">
+                remarks = #{remarks,jdbcType=NVARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+
+    <delete id="delDictClass">
+        delete from sys_dict_class where id = #{id}
+    </delete>
+
+    <select id="getClassByParentId" resultType="com.theus.health.base.model.po.system.SysDictClass">
+        select a.*
+        from sys_dict_class a
+        WHERE a.parent_id = #{parentId}
+    </select>
 </mapper>

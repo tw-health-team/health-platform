@@ -4,10 +4,12 @@ import lombok.Data;
 
 /**
  * @author tangwei
- * @date 2019-10-16 21:00
+ * @date 2019-11-15 8:55
  */
 @Data
-public class SysDictDTO {
+public class DictExistsQueryDTO {
+
+    private String id;
 
     private String classCode;
 

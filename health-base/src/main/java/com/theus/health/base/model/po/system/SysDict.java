@@ -13,26 +13,23 @@ import lombok.NoArgsConstructor;
  * @date 2019-10-07 22:12
  */
 @Data
-@EqualsAndHashCode(callSuper=true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class SysDict extends BaseModel{
+public class SysDict {
 
 	@TableId
 	private String id;
 
-    private String value;
+    private String itemValue;
 
-    private String label;
+    private String itemName;
 
-    private String type;
+    private String simpleSpelling;
 
-    private String description;
+    private String classCode;
 
     private Long sort;
 
     private String remarks;
-
-    private Byte delFlag;
 
 }

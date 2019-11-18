@@ -9,8 +9,9 @@ import lombok.EqualsAndHashCode;
  * @date 2019-10-07 22:06
  */
 @Data
-@EqualsAndHashCode(callSuper=true)
-public class FindDictDTO extends BaseSplitPageDTO {
+public class FindDictDTO {
 
-    private String name;
+    private String classCode;
+
+    private String searchText;
 }
