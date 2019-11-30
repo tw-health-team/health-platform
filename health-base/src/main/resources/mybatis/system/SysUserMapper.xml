@@ -3,7 +3,7 @@
 <mapper namespace="com.theus.health.base.mapper.system.SysUserMapper">
 
     <select id="findPage" resultType="com.theus.health.base.model.po.system.SysUser">
-        select u.*, (select d.name from sys_organ d where d.id = u.dept_id) deptName
+        select u.*, (select d.name from sys_organ d where d.id = u.organ_id) organName
         from sys_user u
         WHERE 1=1
         <if test="user.name != null and user.name != '' ">

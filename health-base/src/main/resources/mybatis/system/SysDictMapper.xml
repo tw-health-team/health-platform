@@ -8,7 +8,8 @@
         WHERE 1=1 and u.class_code = #{param.classCode}
         <if test="param.searchText != null and param.searchText != '' ">
             and (u.item_name like '%'+#{param.searchText}+'%'
-            or u.simple_spelling like '%'+#{param.searchText}+'%')
+            or u.simple_spelling like '%'+#{param.searchText}+'%'
+            or u.simple_wubi like '%'+#{param.searchText}+'%')
         </if>
         order by u.sort
     </select>
@@ -26,7 +27,8 @@
         WHERE 1=1
         <if test="param.searchText != null and param.searchText != '' ">
             and (a.name like '%'+#{param.searchText}+'%'
-            or a.simple_spelling like '%'+#{param.searchText}+'%')
+            or a.simple_spelling like '%'+#{param.searchText}+'%'
+            or a.simple_wubi like '%'+#{param.searchText}+'%')
         </if>
         order by a.sort
     </select>
@@ -75,10 +77,10 @@
     </select>
 
     <insert id="insertDictClass" parameterType="com.theus.health.base.model.po.system.SysDictClass">
-        insert into sys_dict_class (id, parent_id, code, name, simple_spelling, sort, remarks)
+        insert into sys_dict_class (id, parent_id, code, name, simple_spelling,simple_spelling, sort, remarks)
         values (#{id,jdbcType=VARCHAR}, #{parentId,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR},
-                #{name,jdbcType=NVARCHAR}, #{simpleSpelling,jdbcType=NVARCHAR}, #{sort,jdbcType=INTEGER},
-                #{remarks,jdbcType=NVARCHAR})
+                #{name,jdbcType=NVARCHAR}, #{simpleSpelling,jdbcType=NVARCHAR}, #{simpleWubi,jdbcType=NVARCHAR},
+                #{sort,jdbcType=INTEGER}, #{remarks,jdbcType=NVARCHAR})
     </insert>
 
     <update id="updateDictClass" parameterType="com.theus.health.base.model.po.system.SysDictClass">
@@ -95,6 +97,9 @@
             </if>
             <if test="simpleSpelling != null">
                 simple_spelling = #{simpleSpelling,jdbcType=NVARCHAR},
+            </if>
+            <if test="simpleWubi != null">
+                simple_wubi = #{simpleWubi,jdbcType=NVARCHAR},
             </if>
             <if test="sort != null">
                 sort = #{sort,jdbcType=INTEGER},

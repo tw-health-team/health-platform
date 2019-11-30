@@ -21,6 +21,8 @@ public class SysDictClass {
 
     private String simpleSpelling;
 
+    private String simpleWubi;
+
     private Integer sort;
 
     private String remarks;

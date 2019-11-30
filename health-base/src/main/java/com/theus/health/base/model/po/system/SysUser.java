@@ -31,9 +31,9 @@ public class SysUser extends BaseModel implements Serializable  {
     private String email;
     private String mobile;
     private Integer status;
-    private String deptId;
+    private String organId;
     @TableField(exist = false)
-    private String deptName;
+    private String organName;
     @TableField(exist = false)
     private List<SysRole> roles;
 

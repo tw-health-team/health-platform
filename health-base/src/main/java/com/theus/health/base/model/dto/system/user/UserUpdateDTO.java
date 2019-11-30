@@ -31,9 +31,9 @@ public class UserUpdateDTO {
 
     private String mobile;
 
-    private String deptId;
+    private String organId;
 
-    private String deptName;
+    private String organName;
 
     @NotNull(message = "状态标识不能为空")
     private Integer status;

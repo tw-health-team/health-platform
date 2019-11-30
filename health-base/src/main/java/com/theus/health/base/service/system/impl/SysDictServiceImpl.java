@@ -13,6 +13,7 @@ import com.theus.health.base.service.system.SysDictService;
 import com.theus.health.core.exception.BusinessException;
 import com.theus.health.core.util.BaseConverter;
 import com.theus.health.core.util.ChinesePinyinUtil;
+import com.theus.health.core.util.WuBiUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,10 +59,8 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
     public void addDictItem(DictAddDTO dictAddDTO) {
         SysDict sysDict = new SysDict();
         BeanUtils.copyProperties(dictAddDTO, sysDict);
-        // 判断字典项是否存在
-        this.exists(sysDict);
-        // 获取名称的拼音首字母
-        sysDict.setSimpleSpelling(ChinesePinyinUtil.getPinYinHeadChar(sysDict.getItemName()));
+        // 判断字典项是否存在及完善字典项数据
+        handleDictItem(sysDict);
         this.baseMapper.insert(sysDict);
     }
 
@@ -69,11 +68,22 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
     public void updateDictItem(DictUpdateDTO dictUpdateDTO) {
         SysDict sysDict = new SysDict();
         BeanUtils.copyProperties(dictUpdateDTO, sysDict);
+        // 判断字典项是否存在及完善字典项数据
+        handleDictItem(sysDict);
+        this.baseMapper.updateById(sysDict);
+    }
+
+    /**
+     * 判断字典项是否存在及完善字典项数据
+     * @param sysDict 字典项
+     */
+    private void handleDictItem(SysDict sysDict){
         // 判断字典项是否存在
         this.exists(sysDict);
         // 获取名称的拼音首字母
         sysDict.setSimpleSpelling(ChinesePinyinUtil.getPinYinHeadChar(sysDict.getItemName()));
-        this.baseMapper.updateById(sysDict);
+        // 获取名称的五笔码
+        sysDict.setSimpleWubi(WuBiUtil.getWubiHeadChar(sysDict.getItemName()));
     }
 
     @Override
@@ -97,7 +107,7 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
 
     @Override
     public List<DictClassVO> findDictClassList(FindClassVO findClassVO) {
-        List<DictClassVO> dictClassVOList = new ArrayList<>();
+        List<DictClassVO> dictClassVOList;
         List<SysDictClass> sysDictClassList;
         // 查询条件为空
         if (StrUtil.isBlank(findClassVO.getSearchText())) {
@@ -208,11 +218,10 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
     public void addDictClass(DictClassAddVO dictClassAddVO) {
         SysDictClass sysDictClass = new SysDictClass();
         BeanUtils.copyProperties(dictClassAddVO,sysDictClass);
-        this.existsClass(sysDictClass);
         // 生成主键待修改
         sysDictClass.setId(UUID.randomUUID().toString());
-        // 获取名称的拼音首字母
-        sysDictClass.setSimpleSpelling(ChinesePinyinUtil.getPinYinHeadChar(sysDictClass.getName()));
+        // 处理字典项分类
+        handleDictClass(sysDictClass);
         this.baseMapper.insertDictClass(sysDictClass);
     }
 
@@ -220,10 +229,21 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
     public void updateDictClass(DictClassUpdateVO dictClassUpdateVO) {
         SysDictClass sysDictClass = new SysDictClass();
         BeanUtils.copyProperties(dictClassUpdateVO,sysDictClass);
+        // 处理字典项分类
+        handleDictClass(sysDictClass);
+        this.baseMapper.updateDictClass(sysDictClass);
+    }
+
+    /**
+     * 判断字典项分类是否存在及完善字典项分类
+     * @param sysDictClass 字典项分类
+     */
+    private void handleDictClass(SysDictClass sysDictClass){
         this.existsClass(sysDictClass);
         // 获取名称的拼音首字母
         sysDictClass.setSimpleSpelling(ChinesePinyinUtil.getPinYinHeadChar(sysDictClass.getName()));
-        this.baseMapper.updateDictClass(sysDictClass);
+        // 获取名称的五笔码
+        sysDictClass.setSimpleWubi(WuBiUtil.getWubiHeadChar(sysDictClass.getName()));
     }
 
     @Override
