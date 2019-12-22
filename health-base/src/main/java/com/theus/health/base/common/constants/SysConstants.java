@@ -7,9 +7,19 @@ package com.theus.health.base.common.constants;
 public interface SysConstants {
 
     /**
-     * 系统管理员用户名
+     * 超级管理员用户名
      */
-    String ADMIN = "admin";
+    String SUPER_ADMIN = "admin";
+
+    /**
+     * 超级管理员角色ID
+     */
+    String SUPER_ROLE_ID = "999999999";
+
+    /**
+     * 超级管理员角色名称
+     */
+    String SUPER_ROLE_NAME = "超级管理员";
 
     /**
      * 顶级机构代码

@@ -9,6 +9,7 @@ import com.theus.health.base.model.dto.system.organ.OrganAddDTO;
 import com.theus.health.base.model.dto.system.organ.OrganUpdateDTO;
 import com.theus.health.base.model.dto.system.organ.FindOrganDTO;
 import com.theus.health.base.model.po.system.SysOrgan;
+import com.theus.health.base.service.global.impl.BaseServiceImpl;
 import com.theus.health.base.service.system.SysOrganService;
 import com.theus.health.base.util.ShiroUtils;
 import com.theus.health.core.exception.BusinessException;
@@ -56,11 +57,8 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
         }
         // 获取机构名称的拼音首字母
         findDept.setSimpleSpelling(ChinesePinyinUtil.getPinYinHeadChar(findDept.getName()));
-        findDept.setCreateTime(new Date());
-
-        // 获取登录用户名--待优化
-        findDept.setCreateBy(ShiroUtils.getUser().getName());
-
+        // 赋值新增固定字段
+        ShiroUtils.setInsert(findDept);
         this.save(findDept);
     }
 
@@ -83,6 +81,8 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
                     String.format("更新失败，已经存在机构名为 %s 的机构", updateDTO.getName()));
         }
         BeanUtils.copyProperties(updateDTO, organ);
+        // 赋值修改固定字段
+        ShiroUtils.setUpdate(organ);
         try {
             this.updateById(organ);
         } catch (BusinessException e) {

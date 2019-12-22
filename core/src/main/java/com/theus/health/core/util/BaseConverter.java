@@ -49,7 +49,7 @@ public class BaseConverter<DO, VO> {
     /**
      * 属性拷贝方法，有特殊需求时子类覆写此方法
      */
-    private void convert(DO from, VO to) {
+    protected void convert(DO from, VO to) {
         BeanUtils.copyProperties(from, to);
     }
 }

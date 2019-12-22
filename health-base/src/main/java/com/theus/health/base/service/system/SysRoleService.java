@@ -26,6 +26,12 @@ public interface SysRoleService extends IService<SysRole>,
     List<SysRole> findAllRoleByUserId(String uid, Boolean hasResource);
 
     /**
+     * 获取超级管理员角色
+     * @return 角色信息
+     */
+    SysRole getSuperRole();
+
+    /**
      * 更新缓存
      * @param role 角色
      * @param author 是否清空授权信息

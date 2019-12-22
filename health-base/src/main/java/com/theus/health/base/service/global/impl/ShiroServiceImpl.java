@@ -39,7 +39,7 @@ public class ShiroServiceImpl implements ShiroService {
         List<String[]> permsList = new LinkedList<>();
         List<String[]> anonList = new LinkedList<>();
 
-        List<SysResource> resources = resourceService.list();
+        List<SysResource> resources = resourceService.treeList();
 
         if(resources!=null){
             for (SysResource resource : resources) {

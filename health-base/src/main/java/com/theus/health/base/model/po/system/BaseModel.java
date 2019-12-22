@@ -10,15 +10,27 @@ import java.util.Date;
  * @date 2019-09-22 20:05
  */
 @Data
-class BaseModel {
+public class BaseModel {
 
-    private String createBy;
+    private String createUserId;
+
+    private String createUserName;
+
+    private String createOrganId;
+
+    private String createOrganName;
 
     private Date createTime;
 
-    private String lastUpdateBy;
+    private String updateUserId;
 
-    private Date lastUpdateTime;
+    private String updateUserName;
+
+    private String updateOrganId;
+
+    private String updateOrganName;
+
+    private Date updateTime;
 
     private Byte delFlag;
 }

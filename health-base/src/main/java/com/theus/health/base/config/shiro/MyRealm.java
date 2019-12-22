@@ -20,6 +20,11 @@ import javax.annotation.Resource;
 import java.util.List;
 
 /**
+ * 域，Shiro从从Realm获取安全数据（如用户、角色、权限）
+ * 就是说SecurityManager要验证用户身份，那么它需要从Realm获取相应的用户进行比较以确定用户身份是否合法；
+ * 也需要从Realm得到用户相应的角色/权限进行验证用户是否能进行操作；可以把Realm看成DataSource，即安全数据源。
+ * 可以有1个或多个Realm
+ *
  * @author tangwei
  * @date 2019-06-15 21:15
  */
@@ -37,12 +42,15 @@ public class MyRealm extends AuthorizingRealm {
         return token instanceof JwtToken;
     }
 
+    /**
+     * 授权-权限验证(接口保护，验证接口调用权限时调用)
+     */
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
         log.info("Shiro权限验证执行");
         JwtToken jwtToken = new JwtToken();
-        BeanUtils.copyProperties(principalCollection.getPrimaryPrincipal(),jwtToken);
-        if(jwtToken.getUsername()!=null) {
+        BeanUtils.copyProperties(principalCollection.getPrimaryPrincipal(), jwtToken);
+        if (jwtToken.getUsername() != null) {
             SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
             SysUser findUser = userService.findUserByName(jwtToken.getUsername(), true);
             if (findUser != null) {
@@ -64,45 +72,46 @@ public class MyRealm extends AuthorizingRealm {
         throw new DisabledAccountException("用户信息异常，请重新登录！");
     }
 
+    /**
+     * 身份认证(登录时调用)
+     */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
-        JwtToken token  = (JwtToken) authenticationToken;
+        JwtToken token = (JwtToken) authenticationToken;
         SysUser user;
-        String username = token.getUsername()!=null ? token.getUsername() : JwtUtil.getUsername(token.getToken());
+        String username = token.getUsername() != null ? token.getUsername() : JwtUtil.getUsername(token.getToken());
         try {
-            user = userService.getOne(new QueryWrapper<SysUser>()
-                    .eq("name",username)
-                    .select("id,name,status,password"));
-        }catch (BusinessException e){
+            user = userService.findUserByName(username,false);
+        } catch (BusinessException e) {
             throw new DisabledAccountException(e.getMsg());
         }
-        if(user==null){
+        if (user == null) {
             throw new DisabledAccountException("用户不存在！");
         }
-        if(user.getStatus()!=1){
-            throw new DisabledAccountException("用户账户已锁定，暂无法登陆！");
+        if (user.getStatus() != 1) {
+            throw new LockedAccountException("用户账户已锁定，暂无法登陆！");
         }
-        if(token.getUsername()==null) {
+        if (token.getUsername() == null) {
             token.setUsername(user.getName());
         }
         String sign = JwtUtil.sign(user.getId(), user.getName(), user.getPassword());
-        if(token.getToken()==null) {
+        if (token.getToken() == null) {
             token.setToken(sign);
         }
         token.setUid(user.getId());
-        return new SimpleAuthenticationInfo(token,user.getPassword(),user.getId());
+        return new SimpleAuthenticationInfo(token, user.getPassword(), user.getId());
     }
 
-    public void clearAuthByUserId(String uid,Boolean author, Boolean out){
+    public void clearAuthByUserId(String uid, Boolean author, Boolean out) {
         //获取所有session
         Cache<Object, Object> cache = cacheManager
-                .getCache(MyRealm.class.getName()+".authorizationCache");
+                .getCache(MyRealm.class.getName() + ".authorizationCache");
         cache.remove(uid);
     }
 
-    public void clearAuthByUserIdCollection(List<String> userList, Boolean author, Boolean out){
+    public void clearAuthByUserIdCollection(List<String> userList, Boolean author, Boolean out) {
         Cache<Object, Object> cache = cacheManager
-                .getCache(MyRealm.class.getName()+".authorizationCache");
+                .getCache(MyRealm.class.getName() + ".authorizationCache");
         userList.forEach(cache::remove);
     }
 }

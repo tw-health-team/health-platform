@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.theus.health.base.common.constants.SysConstants;
 import com.theus.health.base.model.po.system.SysResource;
 import com.theus.health.base.model.po.system.SysRole;
 import com.theus.health.base.model.po.system.SysRoleResource;
@@ -13,6 +14,7 @@ import com.theus.health.base.model.dto.system.role.FindRoleDTO;
 import com.theus.health.base.model.dto.system.role.RoleAddDTO;
 import com.theus.health.base.model.dto.system.role.RoleUpdateDTO;
 import com.theus.health.base.service.global.ShiroService;
+import com.theus.health.base.service.system.SysResourceService;
 import com.theus.health.base.service.system.SysRoleResourceService;
 import com.theus.health.base.service.system.SysRoleService;
 import com.theus.health.base.service.system.SysUserRoleService;
@@ -37,6 +39,9 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     private SysRoleResourceService roleResourceService;
 
     @Resource
+    private SysResourceService resourceService;
+
+    @Resource
     private SysUserRoleService userRoleService;
 
     @Resource
@@ -57,6 +62,17 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
             roles.add(role);
         });
         return roles;
+    }
+
+    @Override
+    public SysRole getSuperRole() {
+        SysRole sysRole = new SysRole();
+        sysRole.setId(SysConstants.SUPER_ROLE_ID);
+        sysRole.setName(SysConstants.SUPER_ROLE_NAME);
+        // 获取所有资源
+        List<SysResource> permissions = resourceService.list(new QueryWrapper<SysResource>().orderByAsc("permission"));
+        sysRole.setResources(permissions);
+        return sysRole;
     }
 
     @Override

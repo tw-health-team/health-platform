@@ -24,4 +24,11 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
      * @return 用户list
      */
     List<SysUser> findPage(IPage<SysUser> page, @Param("user")FindUserDTO findUserDTO);
+
+    /**
+     * 获取用户信息
+     * @param name 用户名
+     * @return 用户信息
+     */
+    SysUser getUser(String name);
 }
