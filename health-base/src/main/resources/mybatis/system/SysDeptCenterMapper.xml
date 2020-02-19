@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.theus.health.base.mapper.system.SysDeptCenterMapper">
+
+    <select id="findTree" resultType="com.theus.health.base.model.po.system.SysDeptCenter">
+        select a.*, (select b.name from sys_dept_center b where b.id = a.parent_id) parentName,
+        (SELECT c.item_name FROM sys_dict c WHERE c.class_code='1005001' AND c.item_value=a.category) categoryName,
+        (SELECT c.item_name FROM sys_dict c WHERE c.class_code='1005002' AND c.item_value=a.runk) runkName
+        from sys_dept_center a
+        WHERE 1=1
+        <if test="deptCenter.id != null and deptCenter.id != '' ">
+            and a.id = #{deptCenter.id}
+        </if>
+        <if test="deptCenter.name != null and deptCenter.name != '' ">
+            and (a.name like '%'+#{deptCenter.name}+'%'
+            or a.simple_wubi like '%'+#{deptCenter.name}+'%'
+            or a.simple_spelling like '%'+#{deptCenter.name}+'%')
+        </if>
+    </select>
+</mapper>

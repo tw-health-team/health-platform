@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.theus.health.base.mapper.system.SysDeptOrganMapper">
+
+
+    <select id="findPage" resultType="com.theus.health.base.model.po.system.SysDeptOrgan">
+        select a.*,
+        (SELECT c.name FROM sys_organ c WHERE c.[id]=a.organ_id) organName,
+        (SELECT c.name FROM sys_dept_center c WHERE c.[id]=a.dept_center_id) deptCenterName,
+        (SELECT c.item_name FROM sys_dict c WHERE c.class_code='1005003' AND c.item_value=a.outpatient_type) outpatientTypeName,
+        (SELECT c.item_name FROM sys_dict c WHERE c.class_code='1005004' AND c.item_value=a.registered_state) registeredStateName
+        from sys_dept_organ a
+        WHERE 1=1
+        <if test="deptOrgan.organId != null and deptOrgan.organId != '' ">
+            and a.organ_id = #{deptOrgan.organId}
+        </if>
+        <if test="deptOrgan.deptOrganId != null and deptOrgan.deptOrganId != '' ">
+            and a.dept_id = #{deptOrgan.deptOrganId}
+        </if>
+        <if test="deptOrgan.deptOrganName != null and deptOrgan.deptOrganName != '' ">
+            and (a.dept_name like '%'+#{deptOrgan.deptOrganName}+'%'
+            or a.simple_wubi like '%'+#{deptOrgan.deptOrganName}+'%'
+            or a.simple_spelling like '%'+#{deptOrgan.deptOrganName}+'%')
+        </if>
+        order by a.organ_Id,a.dept_Id
+    </select>
+</mapper>
