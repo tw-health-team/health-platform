@@ -31,7 +31,7 @@ public class SysResourceController {
     @SysLogs("获取所有的资源列表")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
     public ResponseResult list(){
-        return ResponseResult.e(ResponseCode.OK,resourceService.list());
+        return ResponseResult.e(ResponseCode.OK,resourceService.treeList());
     }
 
     @PostMapping(value = {"/add"})

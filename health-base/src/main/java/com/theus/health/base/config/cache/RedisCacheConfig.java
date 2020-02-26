@@ -1,12 +1,10 @@
 package com.theus.health.base.config.cache;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
@@ -19,8 +17,12 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisCacheConfig extends CachingConfigurerSupport {
 
+    /**
+     * 在application,properties,查找spring.redis开头的配置
+     * @return 连接工厂
+     */
     @Bean
-    @ConfigurationProperties("redis")
+    @ConfigurationProperties(prefix = "spring.redis")
     public JedisConnectionFactory jedisConnectionFactory(){
         return new JedisConnectionFactory();
     }
@@ -45,9 +47,17 @@ public class RedisCacheConfig extends CachingConfigurerSupport {
 //        return new RedisCacheManager(redisTemplate);
 //    }
 
+    /**
+     * 配置RedisTemplate
+     * 设置添加序列化器
+     * key 使用string序列化器
+     * value 使用Json序列化器
+     * @param jedisConnectionFactory jedis连接工厂
+     * @return redisTemplate
+     */
     @Bean
-    public RedisTemplate<Object, Object> redisTemplate(JedisConnectionFactory jedisConnectionFactory) {
-        RedisTemplate<Object, Object> template = new RedisTemplate<>();
+    public RedisTemplate<String, Object> redisTemplate(JedisConnectionFactory jedisConnectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(jedisConnectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());

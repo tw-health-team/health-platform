@@ -123,6 +123,11 @@ public class ShiroConfiguration {
         return new RedisManager();
     }
 
+    /**
+     * 缓存控制器，来管理如用户、角色、权限等的缓存的；
+     * @param manager RedisManager
+     * @return cacheManager
+     */
     @Bean("shiroRedisCacheManager")
     public RedisCacheManager cacheManager(RedisManager manager) {
         RedisCacheManager redisCacheManager = new RedisCacheManager();

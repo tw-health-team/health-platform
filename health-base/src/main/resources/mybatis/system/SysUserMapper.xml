@@ -9,6 +9,15 @@
         <if test="user.name != null and user.name != '' ">
             and u.name like '%'+#{user.name}+'%'
         </if>
+        <if test="user.organId != null and user.organId != '' ">
+            and u.organ_id = #{user.organId}
+        </if>
+    </select>
+
+    <select id="getUser" resultType="com.theus.health.base.model.po.system.SysUser" parameterType="java.lang.String">
+        select u.*, (select d.name from sys_organ d where d.id = u.organ_id) organName
+        from sys_user u
+        WHERE u.name = #{name}
     </select>
 
 </mapper>

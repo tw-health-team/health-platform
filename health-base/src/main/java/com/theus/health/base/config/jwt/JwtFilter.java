@@ -53,6 +53,7 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
             return false;
         }
         try {
+            // 执行登录
             executeLogin(request, response);
         }catch (BusinessException e){
             writerResponse(res,e.getStatus(),e.getMsg());
@@ -65,6 +66,7 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
                 if(permission==null || "".equals(permission.trim())){
                     continue;
                 }
+                // 权限验证
                 if(subject.isPermitted(permission)){
                     return true;
                 }

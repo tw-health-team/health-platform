@@ -13,4 +13,6 @@ import lombok.EqualsAndHashCode;
 public class FindUserDTO extends BaseSplitPageDTO {
 
     private String name;
+
+    private String organId;
 }

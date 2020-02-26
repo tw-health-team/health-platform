@@ -1,9 +1,11 @@
 package com.theus.health.base.service.system.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.theus.health.base.common.constants.RedisKeyPrefix;
 import com.theus.health.base.common.constants.SysConstants;
 import com.theus.health.base.config.jwt.JwtToken;
 import com.theus.health.base.mapper.system.SysUserMapper;
@@ -23,6 +25,7 @@ import com.theus.health.base.service.system.SysRoleService;
 import com.theus.health.base.service.system.SysUserRoleService;
 import com.theus.health.base.service.system.SysUserService;
 import com.theus.health.base.util.LoginUtil;
+import com.theus.health.base.util.RedisUtil;
 import com.theus.health.base.util.ShiroUtils;
 import com.theus.health.core.bean.ResponseCode;
 import com.theus.health.core.exception.BusinessException;
@@ -56,15 +59,50 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     private SysResourceService resourceService;
     @Resource
     private ShiroService shiroService;
+    @Resource
+    private RedisUtil redisUtil;
 
     @Override
     public SysUser findUserByName(String name, boolean hasResource) {
-        SysUser user = this.getOne(new QueryWrapper<SysUser>().eq("name", name));
+        SysUser user = this.getCacheUser(name);
         if (user == null) {
             return null;
         }
-        user.setRoles(roleService.findAllRoleByUserId(user.getId(), hasResource));
+        if (name.equals(SysConstants.SUPER_ADMIN)) {
+            List<SysRole> roleList = new ArrayList<>();
+            roleList.add(roleService.getSuperRole());
+            user.setRoles(roleList);
+        } else {
+            user.setRoles(roleService.findAllRoleByUserId(user.getId(), hasResource));
+        }
         return user;
+    }
+
+    /**
+     * 根据用户名获取用户
+     *
+     * @param name 用户名
+     * @return 用户信息
+     */
+    @Override
+    public SysUser getCacheUser(String name) {
+        SysUser sysUser = null;
+        String userKey = RedisKeyPrefix.USER + name;
+        try {
+            // 获取redis中缓存的用户
+            if (redisUtil.existKey(userKey)) {
+                sysUser = (SysUser) redisUtil.getObject(userKey);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        // 未获取到用户 则从数据库中获取
+        if (sysUser == null) {
+            sysUser = this.baseMapper.getUser(name);
+            // 缓存用户信息
+            redisUtil.add(userKey, sysUser);
+        }
+        return sysUser;
     }
 
     @Override
@@ -173,10 +211,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public IPage<SysUser> findPage(FindUserDTO findUserDTO) {
+        // 超级管理员才能查询所有机构用户
+        if (!ShiroUtils.isSuperAdmin() && StrUtil.isBlank(findUserDTO.getOrganId())) {
+            throw BusinessException.fail("查询条件【机构ID】不能为空！");
+        }
         IPage<SysUser> userPage = new Page<>(findUserDTO.getPageNum(),
                 findUserDTO.getPageSize());
 
-        userPage.setRecords(this.baseMapper.findPage(userPage,findUserDTO));
+        userPage.setRecords(this.baseMapper.findPage(userPage, findUserDTO));
 
         userPage.getRecords().forEach(v -> {
             //查找匹配所有用户的角色
@@ -253,7 +295,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             throw BusinessException.fail(
                     String.format("更新失败，不存在ID为 %s 的用户", id));
         }
-        if(SysConstants.ADMIN.equalsIgnoreCase(user.getName())) {
+        if (SysConstants.SUPER_ADMIN.equalsIgnoreCase(user.getName())) {
             throw BusinessException.fail("超级管理员不允许修改!");
         }
         SysUser findUser = this.getOne(new QueryWrapper<SysUser>()
@@ -263,8 +305,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                     String.format("更新失败，已经存在用户名为 %s 的用户", updateDTO.getName()));
         }
         // 修改用户, 且修改了密码
-        if(!updateDTO.getPassword().equals(user.getPassword())
-           && !updateDTO.getPassword().equals(Encrypt.md5(user.getPassword() + user.getName()))) {
+        if (!updateDTO.getPassword().equals(user.getPassword())
+                && !updateDTO.getPassword().equals(Encrypt.md5(user.getPassword() + user.getName()))) {
             updateDTO.setPassword(Encrypt.md5(updateDTO.getPassword() + updateDTO.getName()));
         }
         BeanUtils.copyProperties(updateDTO, user);
@@ -313,7 +355,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     public Set<String> findPermissions(String userName) {
         Set<String> perms = new HashSet<>();
         List<SysResource> sysResources = resourceService.findByUser(userName);
-        for(SysResource sysResource:sysResources) {
+        for (SysResource sysResource : sysResources) {
             perms.add(sysResource.getPermission());
         }
         return perms;

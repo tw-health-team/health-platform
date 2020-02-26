@@ -33,7 +33,7 @@ public class SysResourceServiceImpl extends ServiceImpl<SysResourceMapper, SysRe
     private  SysResourceMapper sysResourceMapper;
 
     @Override
-    public List<SysResource> list() {
+    public List<SysResource> treeList() {
         QueryWrapper<SysResource> wrapper = new QueryWrapper<>();
         wrapper.eq("parent_id", "0")
                 .or()
@@ -154,7 +154,7 @@ public class SysResourceServiceImpl extends ServiceImpl<SysResourceMapper, SysRe
     @Override
     public List<SysResource> findByUser(String username) {
         List<SysResource> resources;
-        if(username == null || "".equals(username) || SysConstants.ADMIN.equalsIgnoreCase(username)) {
+        if(username == null || "".equals(username) || SysConstants.SUPER_ADMIN.equalsIgnoreCase(username)) {
             QueryWrapper<SysResource> wrapper = new QueryWrapper<>();
             wrapper.orderByAsc("sort");
             // 获取资源

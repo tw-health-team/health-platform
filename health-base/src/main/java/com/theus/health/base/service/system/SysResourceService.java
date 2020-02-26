@@ -17,8 +17,7 @@ public interface SysResourceService extends IService<SysResource> {
      * 获取资源列表
      * @return 资源列表
      */
-    @Override
-    List<SysResource> list();
+    List<SysResource> treeList();
 
     /**
      * 添加资源

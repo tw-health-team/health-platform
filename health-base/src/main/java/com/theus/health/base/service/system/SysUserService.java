@@ -22,7 +22,7 @@ import java.util.Set;
 public interface SysUserService extends IService<SysUser> {
 
     /**
-     * 根据用户名查找用户
+     * 根据用户名查找用户（包括角色信息）
      * @param name 用户名
      * @param hasResource 是否包含权限
      * @return User
@@ -30,12 +30,19 @@ public interface SysUserService extends IService<SysUser> {
     SysUser findUserByName(String name, boolean hasResource);
 
     /**
-     * 根据ID查找用户
+     * 根据ID查找用户包括角色信息）
      * @param id ID
      * @param hasResource 是否包含权限
      * @return User
      */
     SysUser findUserById(String id,boolean hasResource);
+
+    /**
+     * 根据用户名查找用户（不包括角色信息）
+     * @param name 用户名
+     * @return 用户
+     */
+    SysUser getCacheUser(String name);
 
     /**
      * 用户登录操作

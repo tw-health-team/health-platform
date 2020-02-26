@@ -41,8 +41,8 @@ public class SysRoleController implements CrudController<SysRole, RoleAddDTO, Ro
     }
 
     @GetMapping(value="/all")
-    @ApiOperation(value = "查询所有橘色")
-    @SysLogs("查询所有橘色")
+    @ApiOperation(value = "查询所有角色")
+    @SysLogs("查询所有角色")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
     public ResponseResult findAll() {
         return ResponseResult.e(ResponseCode.OK,getService().list());

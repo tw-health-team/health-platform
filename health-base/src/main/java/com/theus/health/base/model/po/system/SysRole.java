@@ -17,10 +17,9 @@ import java.util.List;
  * @date 2019-07-23 22:38
  */
 @Data
-@EqualsAndHashCode(callSuper=true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class SysRole extends BaseModel implements Serializable  {
+public class SysRole implements Serializable  {
 
     @TableId
     private String id;
