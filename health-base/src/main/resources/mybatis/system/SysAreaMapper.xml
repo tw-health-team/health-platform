@@ -2,20 +2,50 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.theus.health.base.mapper.system.SysAreaMapper">
 
-    <select id="findTree" resultType="com.theus.health.base.model.po.system.SysArea">
-        select a.*, (select b.name from sys_area b where b.id = a.parent_id) parentName,
-        (SELECT c.name FROM sys_organ c WHERE c.[id]=a.organ_id) organName,
-        (SELECT c.item_name FROM sys_dict c WHERE c.class_code='1006001' AND c.item_value=a.type) typeName,
-        (SELECT c.item_name FROM sys_dict c WHERE c.class_code='1006002' AND c.item_value=a.provinces_type) typeName
+    <select id="findAreas" resultType="com.theus.health.base.model.po.system.SysArea">
+        select a.*
         from sys_area a
         WHERE 1=1
-        <if test="area.id != null and area.id != '' ">
-            and a.id = #{area.id}
+        <if test="area.parentId != null and area.parentId != '' ">
+            and a.id != #{area.parentId} and a.id like #{area.parentId}+'%'
         </if>
-        <if test="area.name != null and area.name != '' ">
-            and (a.name like '%'+#{area.name}+'%'
-            or a.simple_wubi like '%'+#{area.name}+'%'
-            or a.simple_spelling like '%'+#{area.name}+'%')
+        <if test="area.searchText != null and area.searchText != '' ">
+            and (a.name like '%'+#{area.searchText}+'%'
+            or a.short_name like '%'+#{area.searchText}+'%'
+            or a.full_spelling like '%'+#{area.searchText}+'%'
+            or a.simple_spelling like '%'+#{area.searchText}+'%')
         </if>
+        order by id
+    </select>
+
+    <select id="findChildren" resultType="com.theus.health.base.model.po.system.SysArea">
+        select a.*,(CASE WHEN (SELECT COUNT(1) FROM sys_area b WHERE b.parent_id = a.id )>0 THEN 1 ELSE 0 END) hasChildren
+        from sys_area a
+        WHERE a.parent_id = #{id}
+        order by id
+    </select>
+
+    <select id="getAreaHashMap" resultType="java.util.HashMap">
+        select name,id
+        from sys_area a
+        WHERE a.parent_id = #{id}
+        order by id
+    </select>
+
+    <select id="getLevel123Areas" resultType="java.util.HashMap">
+        select name,left(id+'0000',6) id
+        from sys_area a
+        WHERE a.level_type IN ('1','2','3')
+        order by id
+    </select>
+
+    <select id="getDistricts" resultType="java.util.HashMap">
+        select name,id
+        from sys_area a
+        WHERE a.level_type = '3'
+        <if test="id != null and id != ''">
+            and a.id like #{id}+'%'
+        </if>
+        order by id
     </select>
 </mapper>

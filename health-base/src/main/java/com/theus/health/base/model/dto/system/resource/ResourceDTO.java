@@ -30,7 +30,7 @@ public class ResourceDTO {
     private String icon;
 
     @NotNull(message = "资源排序不能为空")
-    private Long sort;
+    private Integer sort;
 
     private Boolean verification = true;
 

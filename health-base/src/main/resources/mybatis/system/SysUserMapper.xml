@@ -12,6 +12,24 @@
         <if test="user.organId != null and user.organId != '' ">
             and u.organ_id = #{user.organId}
         </if>
+        ORDER BY organ_id
+    </select>
+
+    <select id="getOrganUsers" resultType="com.theus.health.base.model.po.system.SysUser">
+        select u.*, (select d.name from sys_organ d where d.id = u.organ_id) organName
+        from sys_user u
+        WHERE 1=1
+        <if test="user.name != null and user.name != '' ">
+            and u.name like '%'+#{user.name}+'%'
+        </if>
+        <if test="organs!=null and organs.size()>0">
+            AND u.organ_id IN
+            <foreach item="item" index="index" collection="organs"
+                     open="(" separator="," close=")">
+                #{item.id}
+            </foreach>
+        </if>
+        ORDER BY organ_id
     </select>
 
     <select id="getUser" resultType="com.theus.health.base.model.po.system.SysUser" parameterType="java.lang.String">

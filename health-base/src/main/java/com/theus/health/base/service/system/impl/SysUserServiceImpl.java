@@ -14,16 +14,10 @@ import com.theus.health.base.model.dto.system.user.FindUserDTO;
 import com.theus.health.base.model.dto.system.user.ResetPasswordDTO;
 import com.theus.health.base.model.dto.system.user.UserAddDTO;
 import com.theus.health.base.model.dto.system.user.UserUpdateDTO;
-import com.theus.health.base.model.po.system.SysResource;
-import com.theus.health.base.model.po.system.SysRole;
-import com.theus.health.base.model.po.system.SysUser;
-import com.theus.health.base.model.po.system.SysUserRole;
+import com.theus.health.base.model.po.system.*;
 import com.theus.health.base.model.vo.SysUserVO;
 import com.theus.health.base.service.global.ShiroService;
-import com.theus.health.base.service.system.SysResourceService;
-import com.theus.health.base.service.system.SysRoleService;
-import com.theus.health.base.service.system.SysUserRoleService;
-import com.theus.health.base.service.system.SysUserService;
+import com.theus.health.base.service.system.*;
 import com.theus.health.base.util.LoginUtil;
 import com.theus.health.base.util.RedisUtil;
 import com.theus.health.base.util.ShiroUtils;
@@ -61,6 +55,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     private ShiroService shiroService;
     @Resource
     private RedisUtil redisUtil;
+    @Resource
+    private SysOrganService organService;
 
     @Override
     public SysUser findUserByName(String name, boolean hasResource) {
@@ -217,9 +213,21 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         }
         IPage<SysUser> userPage = new Page<>(findUserDTO.getPageNum(),
                 findUserDTO.getPageSize());
-
-        userPage.setRecords(this.baseMapper.findPage(userPage, findUserDTO));
-
+        // ①超级管理员且机构ID为空
+        boolean simpleQuery = ShiroUtils.isSuperAdmin() && StrUtil.isBlank(findUserDTO.getOrganId());
+        if (!simpleQuery) {
+            // ②查询机构用户
+            simpleQuery = findUserDTO.getShowChild() == SysConstants.TrueFalseInt.FALSE;
+        }
+        // 满足①或②
+        if (simpleQuery) {
+            // 获取机构用户
+            userPage.setRecords(this.baseMapper.findPage(userPage, findUserDTO));
+        } else {
+            // 获取机构及其所有下级机构的用户
+            List<SysOrgan> list = organService.getOrganAndAllSubNode(findUserDTO.getOrganId());
+            userPage.setRecords(this.baseMapper.getOrganUsers(userPage, findUserDTO, list));
+        }
         userPage.getRecords().forEach(v -> {
             //查找匹配所有用户的角色
             v.setRoles(roleService.findAllRoleByUserId(v.getId(), false));

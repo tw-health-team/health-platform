@@ -53,15 +53,78 @@ public class SysOrgan extends BaseModel implements Serializable {
 	private String phone;
 
 	/**
-	 * 地址
+	 * 详细地址
 	 */
 	private String address;
+
+	/**
+	 * 所属辖区省编码
+	 */
+	private String locationProvinceCode;
+
+	/**
+	 * 所属辖区省名称
+	 */
+	private String locationProvinceName;
+
+	/**
+	 * 所属辖区市编码
+	 */
+	private String locationCityCode;
+
+	/**
+	 * 所属辖区市名称
+	 */
+	private String locationCityName;
+
+	/**
+	 * 所属辖区县编码
+	 */
+	private String locationDistrictCode;
+
+	/**
+	 * 所属辖区县名称
+	 */
+	private String locationDistrictName;
+
+	/**
+	 * 所属辖区乡编码
+	 */
+	private String locationTownCode;
+
+	/**
+	 * 所属辖区乡名称
+	 */
+	private String locationTownName;
+
+	/**
+	 * 所属辖区村编码
+	 */
+	private String locationCommitteeCode;
+
+	/**
+	 * 所属辖区村名称
+	 */
+	private String locationCommitteeName;
+
+	/**
+	 * 所属辖区编码
+	 */
+	private String locationCode;
+
+	/**
+	 * 所属辖区名称
+	 */
+	private String locationName;
 
 	/**
 	 * 备注
 	 */
 	private String remarks;
 
+	/**
+	 * 排序
+	 */
     private Integer orderNum;
 
 	/**

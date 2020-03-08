@@ -1,106 +1,173 @@
 package com.theus.health.base.model.po.system;
 
 import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 /**
- * @author libin
- * @date 2019-12-11 20:34
+ * 行政区划
+ * @author tangwei
+ * @date 2020-02-23 10:14
  */
 @Data
-//@EqualsAndHashCode(callSuper=true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class SysArea {
 
     /**
-     * 地址编码
+     * 区划ID
      */
-    @TableId
     private String id;
 
     /**
-     * 地址名称
+     * 全称
      */
     private String name;
 
     /**
-     * 地址简称
-     */
-    private String shortName;
-
-    /**
-     * 地址全称
-     */
-    private String fullName;
-
-    /**
-     * 地址类型 1 省 2 市 3 区县 4 街道 5 居委
-     */
-    private String type;
-
-    @TableField(exist = false)
-    private String typeName;
-
-    /**
-     * 省市类型
-     */
-    private String provincesType;
-
-    @TableField(exist = false)
-    private String provincesTypeName;
-
-    /**
-     * 拼音码
-     */
-    private String simpleSpelling;
-
-    /**
-     * 五笔码
-     */
-    private String simpleWubi;
-
-    /**
-     * 上级地址编码
+     * 父ID
      */
     private String parentId;
 
     /**
-     * 上级地址名称
+     * 完整id路径(11000,110100,110105)
      */
-    @TableField(exist = false)
-    private String parentName;
+    private String entirePath;
 
     /**
-     * 所属机构编码
+     * 完整名称(安徽/合肥市/庐阳区)
      */
-    private String organId;
+    private String entireName;
 
     /**
-     * 所属机构名称
+     * 简称
      */
-    @TableField(exist = false)
-    private String organName;
+    private String shortName;
 
     /**
-     * 删除标志 0正常 1删除
+     * 区划级别编码
      */
-    private Integer delFlag;
+    private String levelType;
 
     /**
-     * 年份
+     * 省（自治区、直辖市）全称
      */
-    private String year;
+    private String province;
 
-    @TableField(exist = false)
-    private Integer level;
+    /**
+     * 市（地区）全称
+     */
+    private String city;
 
+    /**
+     * 县（区）全称
+     */
+    private String district;
+
+    /**
+     * 乡（镇、街道）全称
+     */
+    private String town;
+
+    /**
+     * 村（居委）
+     */
+    private String committee;
+
+    /**
+     * 省（自治区、直辖市）简称
+     */
+    private String provinceShortName;
+
+    /**
+     * 市（地区）简称
+     */
+    private String cityShortName;
+
+    /**
+     * 县（区）简称
+     */
+    private String districtShortName;
+
+    /**
+     * 乡（镇、街道）简称
+     */
+    private String townShortName;
+
+    /**
+     * 村（居委）简称
+     */
+    private String committeeShortName;
+
+    /**
+     * 省（自治区、直辖市）拼音
+     */
+    private String provinceSpelling;
+
+    /**
+     * 市（地区）拼音
+     */
+    private String citySpelling;
+
+    /**
+     * 县（区）拼音
+     */
+    private String districtSpelling;
+
+    /**
+     * 乡（镇、街道）拼音
+     */
+    private String townSpelling;
+
+    /**
+     * 村（居委）拼音
+     */
+    private String committeeSpelling;
+
+    /**
+     * 拼音
+     */
+    private String fullSpelling;
+
+    /**
+     * 简拼
+     */
+    private String simpleSpelling;
+
+    /**
+     * 首拼
+     */
+    private String firstChar;
+
+    /**
+     * 区号
+     */
+    private String cityCode;
+
+    /**
+     * 邮编
+     */
+    private String zipCode;
+
+    /**
+     * 经度
+     */
+    private String lng;
+
+    /**
+     * 纬度
+     */
+    private String lat;
+
+    /**
+     * 备注
+     */
+    private String remark;
+
+    /**
+     * 是否有子节点(0 无 1 有）
+     */
     @TableField(exist = false)
-    private List<SysArea> children;
+    private int hasChildren;
 }

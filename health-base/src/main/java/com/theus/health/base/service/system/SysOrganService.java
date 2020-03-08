@@ -48,4 +48,10 @@ public interface SysOrganService extends IService<SysOrgan> {
      */
     List<SysOrgan> findTree(FindOrganDTO findDeptDTO);
 
+    /**
+     * 获取机构及所有下级机构
+     * @param organId 机构id
+     * @return 机构列表
+     */
+    List<SysOrgan> getOrganAndAllSubNode(String organId);
 }

@@ -45,6 +45,61 @@ public class OrganAddDTO {
     private String address;
 
     /**
+     * 所属辖区省编码
+     */
+    @Size(max = 12,message = "所属辖区省编码不能超过12")
+    private String locationProvinceCode;
+
+    /**
+     * 所属辖区省名称
+     */
+    private String locationProvinceName;
+
+    /**
+     * 所属辖区市编码
+     */
+    @Size(max = 12,message = "所属辖区市编码不能超过12")
+    private String locationCityCode;
+
+    /**
+     * 所属辖区市名称
+     */
+    private String locationCityName;
+
+    /**
+     * 所属辖区县编码
+     */
+    @Size(max = 12,message = "所属辖区区县编码不能超过12")
+    private String locationDistrictCode;
+
+    /**
+     * 所属辖区县名称
+     */
+    private String locationDistrictName;
+
+    /**
+     * 所属辖区乡编码
+     */
+    @Size(max = 12,message = "所属辖区乡编码不能超过12")
+    private String locationTownCode;
+
+    /**
+     * 所属辖区乡名称
+     */
+    private String locationTownName;
+
+    /**
+     * 所属辖区村编码
+     */
+    @Size(max = 12,message = "所属辖区村编码不能超过12")
+    private String locationCommitteeCode;
+
+    /**
+     * 所属辖区村名称
+     */
+    private String locationCommitteeName;
+
+    /**
      * 备注
      */
     @Size(max = 200,message = "备注长度不能超过200")

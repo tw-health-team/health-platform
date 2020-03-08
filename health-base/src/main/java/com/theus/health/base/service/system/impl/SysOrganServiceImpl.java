@@ -41,25 +41,27 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
 
     @Override
     public void add(OrganAddDTO addDTO) {
-        SysOrgan findDept = this.findById(addDTO.getId());
-        if (findDept != null) {
+        SysOrgan findOrgan = this.findById(addDTO.getId());
+        if (findOrgan != null) {
             throw BusinessException.fail(String.format("已经存在机构ID为 %s 的机构", addDTO.getId()));
         }
-        findDept = this.findByName(addDTO.getName());
-        if (findDept != null) {
+        findOrgan = this.findByName(addDTO.getName());
+        if (findOrgan != null) {
             throw BusinessException.fail(String.format("已经存在机构名为 %s 的机构", addDTO.getName()));
         }
-        findDept = new SysOrgan();
-        BeanUtils.copyProperties(addDTO, findDept);
+        findOrgan = new SysOrgan();
+        BeanUtils.copyProperties(addDTO, findOrgan);
         // 上级机构为空 则赋默认值
-        if(StrUtil.isBlank(findDept.getParentId())) {
-            findDept.setParentId(SysConstants.TOP_DEPT_CODE);
+        if (StrUtil.isBlank(findOrgan.getParentId())) {
+            findOrgan.setParentId(SysConstants.TOP_DEPT_CODE);
         }
         // 获取机构名称的拼音首字母
-        findDept.setSimpleSpelling(ChinesePinyinUtil.getPinYinHeadChar(findDept.getName()));
+        findOrgan.setSimpleSpelling(ChinesePinyinUtil.getPinYinHeadChar(findOrgan.getName()));
         // 赋值新增固定字段
-        ShiroUtils.setInsert(findDept);
-        this.save(findDept);
+        ShiroUtils.setInsert(findOrgan);
+        // 完善机构数据
+        this.completeOrgan(findOrgan);
+        this.save(findOrgan);
     }
 
     @Override
@@ -70,7 +72,7 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
                     String.format("更新失败，不存在ID为 %s 的机构", id));
         }
         // 名称改变 重新生成拼音码
-        if(!organ.getName().equals(updateDTO.getName())){
+        if (!organ.getName().equals(updateDTO.getName())) {
             // 获取机构名称的拼音首字母
             organ.setSimpleSpelling(ChinesePinyinUtil.getPinYinHeadChar(updateDTO.getName()));
         }
@@ -81,6 +83,8 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
                     String.format("更新失败，已经存在机构名为 %s 的机构", updateDTO.getName()));
         }
         BeanUtils.copyProperties(updateDTO, organ);
+        // 完善机构数据
+        this.completeOrgan(organ);
         // 赋值修改固定字段
         ShiroUtils.setUpdate(organ);
         try {
@@ -89,6 +93,33 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
             throw BusinessException.fail(e.getMsg(), e);
         } catch (Exception e) {
             throw BusinessException.fail("机构信息更新失败", e);
+        }
+    }
+
+    /**
+     * 完善机构信息
+     *
+     * @param sysOrgan 机构
+     */
+    private void completeOrgan(SysOrgan sysOrgan) {
+        if (sysOrgan != null) {
+            String locationCode = sysOrgan.getLocationProvinceCode();
+            String locationName = sysOrgan.getLocationProvinceName();
+            if (StrUtil.isNotBlank(sysOrgan.getLocationCommitteeCode())) {
+                locationCode = sysOrgan.getLocationCommitteeCode();
+                locationName = sysOrgan.getLocationCommitteeName();
+            } else if (StrUtil.isNotBlank(sysOrgan.getLocationTownCode())) {
+                locationCode = sysOrgan.getLocationTownCode();
+                locationName = sysOrgan.getLocationTownName();
+            } else if (StrUtil.isNotBlank(sysOrgan.getLocationDistrictCode())) {
+                locationCode = sysOrgan.getLocationDistrictCode();
+                locationName = sysOrgan.getLocationDistrictName();
+            } else if (StrUtil.isNotBlank(sysOrgan.getLocationCityCode())) {
+                locationCode = sysOrgan.getLocationCityCode();
+                locationName = sysOrgan.getLocationCityName();
+            }
+            sysOrgan.setLocationCode(locationCode);
+            sysOrgan.setLocationName(locationName);
         }
     }
 
@@ -106,12 +137,6 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
             sysOrganList = this.baseMapper.list(findOrganDTO);
             // 循环机构列表
             for (SysOrgan organ : sysOrganList) {
-                // 不是顶级机构 则获取上级机构的名称
-//                if (StrUtil.isNotBlank(organ.getParentId()) && !"0".equals(organ.getParentId())) {
-//                    SysOrgan sysOrgan = this.getOne(new QueryWrapper<SysOrgan>()
-//                            .eq("id", organ.getParentId()).select("name"));
-//                    organ.setParentName(sysOrgan.getName());
-//                }
                 // 将所有机构置为第一层
                 organ.setTreeLayer(0);
                 sysOrgans.add(organ);
@@ -124,12 +149,42 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
         return sysOrgans;
     }
 
+    @Override
+    public List<SysOrgan> getOrganAndAllSubNode(String organId) {
+        List<SysOrgan> sysOrgans = new ArrayList<>();
+        List<SysOrgan> children;
+        SysOrgan sysOrgan = this.getOne(new QueryWrapper<SysOrgan>()
+                .eq("id", organId));
+        children = this.getChildren(organId);
+        sysOrgans.add(sysOrgan);
+        sysOrgans.addAll(children);
+        return sysOrgans;
+    }
+
+    /**
+     * 获取所有下级机构
+     *
+     * @param organId 机构id
+     * @return 所有下级机构list
+     */
+    private List<SysOrgan> getChildren(String organId) {
+        List<SysOrgan> children = this.list(new QueryWrapper<SysOrgan>()
+                .eq("parent_id", organId));
+        List<SysOrgan> grandChildren = new ArrayList<>();
+        children.forEach(v -> {
+            grandChildren.addAll(this.getChildren(v.getId()));
+        });
+        children.addAll(grandChildren);
+        return children;
+    }
+
     /**
      * 根据机构列表生成机构树
+     *
      * @param organList 机构列表
      * @return 机构树
      */
-    private List<SysOrgan> initTree(List<SysOrgan> organList){
+    private List<SysOrgan> initTree(List<SysOrgan> organList) {
         List<SysOrgan> sysDepts = new ArrayList<>();
         if (organList != null) {
             // 循环机构列表
@@ -150,8 +205,9 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
 
     /**
      * 根据上级机构和机构列表生成机构树
+     *
      * @param sysOrgans 上级机构list
-     * @param organs 机构列表
+     * @param organs    机构列表
      */
     private void findChildren(List<SysOrgan> sysOrgans, List<SysOrgan> organs) {
         // 循环上级机构
@@ -178,11 +234,11 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
      *
      * @param sysOrgan 机构信息
      */
-    private void findChildren(SysOrgan sysOrgan){
+    private void findChildren(SysOrgan sysOrgan) {
         List<SysOrgan> sysOrgans = this.list(new QueryWrapper<SysOrgan>()
                 .eq("parent_id", sysOrgan.getId())
                 .orderByAsc("order_num"));
-        sysOrgans.forEach(v-> v.setParentName(sysOrgan.getName()));
+        sysOrgans.forEach(v -> v.setParentName(sysOrgan.getName()));
         sysOrgan.setChildren(sysOrgans);
         // 循环机构列表
         for (SysOrgan organ : sysOrgans) {
@@ -190,22 +246,22 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
         }
     }
 
-    private List<SysOrgan> removeDuplicate(List<SysOrgan> organList){
+    private List<SysOrgan> removeDuplicate(List<SysOrgan> organList) {
         List<SysOrgan> sysDepts = new ArrayList<>();
         // 循环机构
         for (SysOrgan organ : organList) {
             boolean isExists = false;
             // 循环其他机构，判断是否存在于其他机构的子机构中
             for (SysOrgan otherDept : organList) {
-                if(!organ.getId().equals(otherDept.getId())){
-                    if(isExistsInList(organ,otherDept.getChildren())){
+                if (!organ.getId().equals(otherDept.getId())) {
+                    if (isExistsInList(organ, otherDept.getChildren())) {
                         isExists = true;
                         break;
                     }
                 }
             }
             // 若不存在与其他机构的子机构中则保留
-            if(!isExists){
+            if (!isExists) {
                 sysDepts.add(organ);
             }
         }
@@ -214,23 +270,24 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
 
     /**
      * 是否存在于列表
-     * @param sysDept 实体
+     *
+     * @param sysDept   实体
      * @param organList 实体list
      * @return 是否
      */
     private boolean isExistsInList(SysOrgan sysDept, List<SysOrgan> organList) {
-        boolean isExists = false;
+        boolean exists = false;
         if (organList != null) {
             for (SysOrgan otherDept : organList) {
                 if (sysDept.getId().equals(otherDept.getId())) {
-                    isExists = true;
+                    exists = true;
                     break;
                 }
-                if (!isExists) {
-                    isExists = isExistsInList(sysDept, otherDept.getChildren());
+                if (!exists) {
+                    exists = isExistsInList(sysDept, otherDept.getChildren());
                 }
             }
         }
-        return isExists;
+        return exists;
     }
 }

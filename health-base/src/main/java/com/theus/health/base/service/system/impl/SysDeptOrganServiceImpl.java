@@ -1,13 +1,10 @@
 package com.theus.health.base.service.system.impl;
 
 
-import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.theus.health.base.common.constants.SysConstants;
-import com.theus.health.base.mapper.system.SysDeptCenterMapper;
 import com.theus.health.base.mapper.system.SysDeptOrganMapper;
 import com.theus.health.base.model.dto.system.deptOrgan.DeptOrganAddDTO;
 import com.theus.health.base.model.dto.system.deptOrgan.DeptOrganUpdateDTO;
@@ -58,8 +55,8 @@ public class SysDeptOrganServiceImpl extends ServiceImpl<SysDeptOrganMapper, Sys
         findDept.setSimpleWubi(WuBiUtil.getWubiHeadChar(findDept.getDeptName()));
         findDept.setCreateTime(new Date());
 
-        // 获取登录用户名--待优化
-        findDept.setCreateBy(ShiroUtils.getUser().getName());
+        // 赋值新增固定字段
+        ShiroUtils.setInsert(findDept);
 
         this.save(findDept);
     }
@@ -95,8 +92,8 @@ public class SysDeptOrganServiceImpl extends ServiceImpl<SysDeptOrganMapper, Sys
 
     /**
      * 查询院内科室分页列表
-     * @param findDeptOrganDTO
-     * @return
+     * @param findDeptOrganDTO 查询条件
+     * @return page 分页数据
      */
     @Override
     public IPage<SysDeptOrgan> findPage(FindDeptOrganDTO findDeptOrganDTO) {

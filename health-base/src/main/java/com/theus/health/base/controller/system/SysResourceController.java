@@ -69,6 +69,4 @@ public class SysResourceController {
     public ResponseResult navTree(@PathVariable("username") @ApiParam("用户名") String username) {
         return ResponseResult.e(ResponseCode.OK,resourceService.findTree(username, 1));
     }
-
-
 }

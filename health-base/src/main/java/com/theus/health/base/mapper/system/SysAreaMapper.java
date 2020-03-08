@@ -7,15 +7,48 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
- * @author libin
- * @date 2019-12-12 15:02
+ * @author tangwei
+ * @date 2020-02-23 14:20
  */
 @Mapper
 @Repository
 public interface SysAreaMapper extends BaseMapper<SysArea> {
 
-    List<SysArea> findTree(@Param(value="area") FindAreaDTO findAreaDTO);
+    /**
+     * 获取行政区划列表
+     * @param findAreaDTO 查询条件
+     * @return 区划list
+     */
+    List<SysArea> findAreas(@Param(value="area") FindAreaDTO findAreaDTO);
+
+    /**
+     * 获取下一级行政区划
+     * @param id 区划id
+     * @return 区划list
+     */
+    List<SysArea> findChildren(String id);
+
+    /**
+     * 获取下一级行政区划
+     * @param id 区划id
+     * @return HashMap-List
+     */
+    List<HashMap<String, Object>> getAreaHashMap(String id);
+
+    /**
+     * 获取省市区数据（不足6位补0）
+     * @return HashMap-List
+     */
+    List<HashMap<String, Object>> getLevel123Areas();
+
+    /**
+     * 获取所有区县或省市下的所有区县
+     * @param id 顶级区划id、空、省市区划id
+     * @return HashMap-List
+     */
+    List<HashMap<String, Object>> getDistricts(@Param(value="id") String id);
 }

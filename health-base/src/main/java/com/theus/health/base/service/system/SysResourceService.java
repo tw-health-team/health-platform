@@ -68,4 +68,5 @@ public interface SysResourceService extends IService<SysResource> {
      * @return 资源列表
      */
     List<SysResource> findByUser(String username);
+
 }

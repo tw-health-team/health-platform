@@ -63,10 +63,8 @@ public class SysDeptCenterServiceImpl extends ServiceImpl<SysDeptCenterMapper, S
         // 获取名称的五笔码
         findDept.setSimpleWubi(WuBiUtil.getWubiHeadChar(findDept.getName()));
         findDept.setCreateTime(new Date());
-
-        // 获取登录用户名--待优化
-        findDept.setCreateBy(ShiroUtils.getUser().getName());
-
+        // 赋值新增固定字段
+        ShiroUtils.setInsert(findDept);
         this.save(findDept);
     }
 
