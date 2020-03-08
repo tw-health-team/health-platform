@@ -18,6 +18,14 @@
             <groupId>com.theus</groupId>
             <artifactId>health-base</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.theus</groupId>
+            <artifactId>health-booking</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.theus</groupId>
+            <artifactId>elderly-care</artifactId>
+        </dependency>
     </dependencies>
 
     <!-- 动态选择配置文件 -->
