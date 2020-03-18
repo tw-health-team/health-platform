@@ -2,14 +2,11 @@ package com.theus.health.base.service.system;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.theus.health.base.model.dto.system.user.ResetPasswordDTO;
-import com.theus.health.base.model.dto.system.user.UserAddDTO;
-import com.theus.health.base.model.dto.system.user.UserUpdateDTO;
+import com.theus.health.base.model.dto.system.user.*;
 import com.theus.health.base.model.po.system.SysResource;
 import com.theus.health.base.model.po.system.SysRole;
 import com.theus.health.base.model.po.system.SysUser;
 import com.theus.health.base.model.dto.SignInDTO;
-import com.theus.health.base.model.dto.system.user.FindUserDTO;
 import com.theus.health.base.model.vo.SysUserVO;
 
 import java.util.List;
@@ -38,11 +35,18 @@ public interface SysUserService extends IService<SysUser> {
     SysUser findUserById(String id,boolean hasResource);
 
     /**
-     * 根据用户名查找用户（不包括角色信息）
+     * 根据用户名查找用户
      * @param name 用户名
      * @return 用户
      */
     SysUser getCacheUser(String name);
+
+    /**
+     * 根据用户名查找用户
+     * @param name 用户名
+     * @return 用户
+     */
+    UserDTO getUserInfo(String name);
 
     /**
      * 用户登录操作

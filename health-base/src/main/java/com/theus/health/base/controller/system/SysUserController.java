@@ -123,6 +123,6 @@ public class SysUserController {
     @SysLogs("获取用户操作权限")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
     public ResponseResult getUserByName(@PathVariable("username") @ApiParam("用户名") String username) {
-        return ResponseResult.e(ResponseCode.OK,sysUserService.getCacheUser(username));
+        return ResponseResult.e(ResponseCode.OK,sysUserService.getUserInfo(username));
     }
 }

@@ -10,10 +10,7 @@ import com.theus.health.base.common.constants.SysConstants;
 import com.theus.health.base.config.jwt.JwtToken;
 import com.theus.health.base.mapper.system.SysUserMapper;
 import com.theus.health.base.model.dto.SignInDTO;
-import com.theus.health.base.model.dto.system.user.FindUserDTO;
-import com.theus.health.base.model.dto.system.user.ResetPasswordDTO;
-import com.theus.health.base.model.dto.system.user.UserAddDTO;
-import com.theus.health.base.model.dto.system.user.UserUpdateDTO;
+import com.theus.health.base.model.dto.system.user.*;
 import com.theus.health.base.model.po.system.*;
 import com.theus.health.base.model.vo.SysUserVO;
 import com.theus.health.base.service.global.ShiroService;
@@ -23,6 +20,7 @@ import com.theus.health.base.util.RedisUtil;
 import com.theus.health.base.util.ShiroUtils;
 import com.theus.health.core.bean.ResponseCode;
 import com.theus.health.core.exception.BusinessException;
+import com.theus.health.core.util.BaseConverter;
 import com.theus.health.core.util.Encrypt;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.DisabledAccountException;
@@ -101,6 +99,18 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             redisUtil.add(userKey, sysUser);
         }
         return sysUser;
+    }
+
+    /**
+     * 根据用户名获取用户
+     *
+     * @param name 用户名
+     * @return 用户信息
+     */
+    @Override
+    public UserDTO getUserInfo(String name) {
+        SysUser sysUser = this.getCacheUser(name);
+        return new BaseConverter<SysUser, UserDTO>().convert(sysUser, UserDTO.class);
     }
 
     @Override
