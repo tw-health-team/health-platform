@@ -81,6 +81,8 @@ public class SysDeptOrganServiceImpl extends ServiceImpl<SysDeptOrganMapper, Sys
             deptCenter.setSimpleWubi(WuBiUtil.getWubiHeadChar(updateDTO.getDeptName()));
         }
         BeanUtils.copyProperties(updateDTO, deptCenter);
+        // 赋值修改固定字段
+        ShiroUtils.setUpdate(deptCenter);
         try {
             this.updateById(deptCenter);
         } catch (BusinessException e) {

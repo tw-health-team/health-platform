@@ -88,6 +88,8 @@ public class SysDeptCenterServiceImpl extends ServiceImpl<SysDeptCenterMapper, S
             deptCenter.setSimpleWubi(WuBiUtil.getWubiHeadChar(updateDTO.getName()));
         }
         BeanUtils.copyProperties(updateDTO, deptCenter);
+        // 赋值修改固定字段
+        ShiroUtils.setUpdate(deptCenter);
         try {
             this.updateById(deptCenter);
         } catch (BusinessException e) {
