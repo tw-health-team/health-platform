@@ -77,9 +77,9 @@ public class MyRealm extends AuthorizingRealm {
      */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
-        JwtToken token = (JwtToken) authenticationToken;
+        JwtToken jwtToken = (JwtToken) authenticationToken;
         SysUser user;
-        String username = token.getUsername() != null ? token.getUsername() : JwtUtil.getUsername(token.getToken());
+        String username = jwtToken.getUsername() != null ? jwtToken.getUsername() : JwtUtil.getUsername(jwtToken.getToken());
         try {
             user = userService.findUserByName(username,false);
         } catch (BusinessException e) {
@@ -91,15 +91,16 @@ public class MyRealm extends AuthorizingRealm {
         if (user.getStatus() != 1) {
             throw new LockedAccountException("用户账户已锁定，暂无法登陆！");
         }
-        if (token.getUsername() == null) {
-            token.setUsername(user.getName());
+        if (jwtToken.getUsername() == null) {
+            jwtToken.setUsername(user.getName());
         }
-        String sign = JwtUtil.sign(user.getId(), user.getName(), user.getPassword());
-        if (token.getToken() == null) {
-            token.setToken(sign);
+        // 生成token
+        String token = JwtUtil.sign(user.getId(), user.getName(), user.getPassword());
+        if (jwtToken.getToken() == null) {
+            jwtToken.setToken(token);
         }
-        token.setUid(user.getId());
-        return new SimpleAuthenticationInfo(token, user.getPassword(), user.getId());
+        jwtToken.setUid(user.getId());
+        return new SimpleAuthenticationInfo(jwtToken, user.getPassword(), user.getId());
     }
 
     public void clearAuthByUserId(String uid, Boolean author, Boolean out) {

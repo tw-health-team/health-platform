@@ -57,6 +57,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     private RedisUtil redisUtil;
     @Resource
     private SysOrganService organService;
+    @Resource
+    private RedisService redisService;
 
     @Override
     public SysUser findUserByName(String name, boolean hasResource) {
@@ -171,7 +173,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                             resourceMap.putIfAbsent(resource.getId(), resource));
                 }
             });
-            Map<String, SysResource> cacheMap = new ConcurrentHashMap<>();
+            Map<String, SysResource> cacheMap = new ConcurrentHashMap<>(16);
             List<SysResource> resourceList = new CopyOnWriteArrayList<>();
             resourceMap.forEach((k, v) -> {
                 SysResource allParent = resourceService.getResourceAllParent(v, cacheMap, resourceMap);
@@ -248,11 +250,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         user.setStatus(status);
         try {
             this.updateById(user);
-            //若为0 需要进行清除登陆授权以及权限信息
-            /*if(status==0){
-
-            }*/
             shiroService.clearAuthByUserId(userId, true, true);
+            redisService.removeUser(user.getName());
         } catch (Exception e) {
             throw BusinessException.fail("操作失败", e);
         }
@@ -273,6 +272,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             userRoleService.remove(new QueryWrapper<SysUserRole>().eq("user_id", user.getId()));
             this.removeById(userId);
             shiroService.clearAuthByUserId(userId, true, true);
+            redisService.removeUser(user.getName());
         } catch (Exception e) {
             throw BusinessException.fail("删除失败", e);
         }
@@ -322,6 +322,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             this.updateById(user);
             this.updateUserRole(user);
             shiroService.clearAuthByUserId(user.getId(), true, false);
+            redisService.removeUser(user.getName());
         } catch (BusinessException e) {
             throw BusinessException.fail(e.getMsg(), e);
         } catch (Exception e) {
@@ -354,6 +355,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         try {
             this.updateById(user);
             shiroService.clearAuthByUserId(user.getId(), true, true);
+            redisService.removeUser(user.getName());
         } catch (Exception e) {
             throw BusinessException.fail(String.format("ID为 %s 的用户密码重置失败", resetPasswordDTO.getUid()), e);
         }

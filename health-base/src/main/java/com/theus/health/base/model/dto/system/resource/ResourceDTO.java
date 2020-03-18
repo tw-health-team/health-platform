@@ -20,7 +20,6 @@ public class ResourceDTO {
     @NotNull(message = "资源类型不能为空")
     private Short type;
 
-    //@NotBlank(message = "资源链接不能为空")
     private String url;
 
     private String color;
@@ -28,6 +27,8 @@ public class ResourceDTO {
     private String permission;
 
     private String icon;
+
+    private String systemId;
 
     @NotNull(message = "资源排序不能为空")
     private Integer sort;
