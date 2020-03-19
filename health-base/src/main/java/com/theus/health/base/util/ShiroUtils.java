@@ -11,7 +11,6 @@ import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Date;
 
 /**
@@ -40,25 +39,22 @@ public class ShiroUtils {
 
     /**
      * 获取当前登录账户
+     *
      * @return 登录用户
      */
     public static SysUser getUser() {
         JwtToken token = (JwtToken) SecurityUtils.getSubject().getPrincipal();
-//        SysUser sysUser = new SysUser();
-//        sysUser.setName(token.getUsername());
-//        sysUser.setId(token.getUid());
-//        sysUser.setPassword(token.getPassword());
-//        return sysUser;
         return userService.getCacheUser(token.getUsername());
     }
 
     /**
      * 获取当前机构是否是超级管理员
+     *
      * @return 是否
      */
     public static Boolean isSuperAdmin() {
         SysUser sysUser = getUser();
-        return sysUser.getName().equals(SysConstants.SUPER_ADMIN);
+        return sysUser != null && sysUser.getName().equals(SysConstants.SUPER_ADMIN);
     }
 
     public static void setSessionAttribute(Object key, Object value) {
@@ -79,31 +75,37 @@ public class ShiroUtils {
 
     /**
      * 插入创建人、创建机构、创建时间、修改人、修改机构、修改时间
+     *
      * @param entity 实体
-     * @param <T> 继承BaseModel的泛型
+     * @param <T>    继承BaseModel的泛型
      */
     public static <T extends BaseModel> void setInsert(T entity) {
         SysUser user = getUser();
-        entity.setCreateUserId(user.getId());
-        entity.setCreateUserName(user.getName());
-        entity.setCreateOrganId(user.getOrganId());
-        entity.setCreateOrganName(user.getOrganName());
-        entity.setCreateTime(new Date());
-        setUpdate(entity);
+        if (user != null) {
+            entity.setCreateUserId(user.getId());
+            entity.setCreateUserName(user.getName());
+            entity.setCreateOrganId(user.getOrganId());
+            entity.setCreateOrganName(user.getOrganName());
+            entity.setCreateTime(new Date());
+            setUpdate(entity);
+        }
     }
 
     /**
      * 插入修改人、修改机构、修改时间
+     *
      * @param entity 实体
-     * @param <T> 继承BaseModel的泛型
+     * @param <T>    继承BaseModel的泛型
      */
     public static <T extends BaseModel> void setUpdate(T entity) {
         SysUser user = getUser();
-        entity.setUpdateUserId(user.getId());
-        entity.setUpdateUserName(user.getName());
-        entity.setUpdateOrganId(user.getOrganId());
-        entity.setUpdateOrganName(user.getOrganName());
-        entity.setUpdateTime(new Date());
+        if (user != null) {
+            entity.setUpdateUserId(user.getId());
+            entity.setUpdateUserName(user.getName());
+            entity.setUpdateOrganId(user.getOrganId());
+            entity.setUpdateOrganName(user.getOrganName());
+            entity.setUpdateTime(new Date());
+        }
     }
 
 }

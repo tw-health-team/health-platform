@@ -23,4 +23,10 @@ public interface SysOrganMapper extends BaseMapper<SysOrgan> {
      * @return 机构列表
      */
     List<SysOrgan> list(@Param(value="organ") FindOrganDTO findDeptDTO);
+
+    /**
+     * 获取所有机构
+     * @return 机构列表
+     */
+    List<SysOrgan> all();
 }

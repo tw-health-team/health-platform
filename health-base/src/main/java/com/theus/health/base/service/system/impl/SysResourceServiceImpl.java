@@ -5,9 +5,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.theus.health.base.common.constants.ResourceConstants;
 import com.theus.health.base.common.constants.SysConstants;
+import com.theus.health.base.mapper.system.SysResourceMapper;
 import com.theus.health.base.model.dto.system.resource.ResourceDTO;
 import com.theus.health.base.model.po.system.SysResource;
-import com.theus.health.base.mapper.system.SysResourceMapper;
 import com.theus.health.base.service.global.ShiroService;
 import com.theus.health.base.service.system.SysResourceService;
 import com.theus.health.core.exception.BusinessException;
@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author tangwei
@@ -36,7 +35,7 @@ public class SysResourceServiceImpl extends ServiceImpl<SysResourceMapper, SysRe
 
     @Override
     public List<SysResource> treeList() {
-        return this.listResourceToTree(this.findAllOrderedResource());
+        return this.listResourceToTree(this.findAllResource());
     }
 
     @Override
@@ -151,7 +150,7 @@ public class SysResourceServiceImpl extends ServiceImpl<SysResourceMapper, SysRe
         // 用户名为空 或者是超级管理员 则获取所有资源
         if (StrUtil.isBlank(username) || SysConstants.SUPER_ADMIN.equalsIgnoreCase(username)) {
             // 获取资源
-            resources = this.findAllOrderedResource();
+            resources = this.findAllResource();
         } else {
             // 查询用户授权的资源
             resources = sysResourceMapper.findByUserName(username);
@@ -160,11 +159,12 @@ public class SysResourceServiceImpl extends ServiceImpl<SysResourceMapper, SysRe
     }
 
     /**
-     * 获取所有资源（排序）
+     * 获取所有资源
      *
      * @return 资源列表
      */
-    private List<SysResource> findAllOrderedResource() {
+    @Override
+    public List<SysResource> findAllResource() {
         QueryWrapper<SysResource> wrapper = new QueryWrapper<>();
         wrapper.orderByAsc("sort");
         // 获取资源
@@ -176,7 +176,7 @@ public class SysResourceServiceImpl extends ServiceImpl<SysResourceMapper, SysRe
         if (StrUtil.isBlank(searchText)) {
             return this.treeList();
         } else {
-            List<SysResource> allResource = this.findAllOrderedResource();
+            List<SysResource> allResource = this.findAllResource();
             return listToTreeByKeywords(allResource, searchText);
         }
     }
@@ -210,7 +210,7 @@ public class SysResourceServiceImpl extends ServiceImpl<SysResourceMapper, SysRe
         // 2.获取子集
         List<SysResource> childList = this.getChildList(resultList, new ArrayList<>(), new HashMap<>(20), allResources);
         // 3.获取自身及父集
-        resultList = this.getSelfAndTheirParentList(resultList, new ArrayList<>(),new HashMap<>(20), allMapOfId);
+        resultList = this.getSelfAndTheirParentList(resultList, new ArrayList<>(), new HashMap<>(20), allMapOfId);
         // 4.合并
         resultList.addAll(childList);
         // 5.将list集转为树tree结构
@@ -222,8 +222,8 @@ public class SysResourceServiceImpl extends ServiceImpl<SysResourceMapper, SysRe
      * 获取子集list
      *
      * @param parentList   父集
-     * @param resultList 结果集
-     * @param filteredMap 用于过滤子集的map
+     * @param resultList   结果集
+     * @param filteredMap  用于过滤子集的map
      * @param allResources 所有剩余资源
      * @return 子集
      */
@@ -308,7 +308,7 @@ public class SysResourceServiceImpl extends ServiceImpl<SysResourceMapper, SysRe
      * @param allResources 所有资源
      * @return 树结构
      */
-    public List<SysResource> listResourceToTree(List<SysResource> allResources) {
+    private List<SysResource> listResourceToTree(List<SysResource> allResources) {
         List<SysResource> listParent = new ArrayList<>();
         if (allResources == null || allResources.size() == 0) {
             return listParent;

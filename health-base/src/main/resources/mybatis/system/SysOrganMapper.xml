@@ -15,4 +15,11 @@
         </if>
     </select>
 
+    <select id="all" resultType="com.theus.health.base.model.po.system.SysOrgan">
+        select a.*, (select b.name from sys_organ b where b.id = a.parent_id) parentName,
+        (SELECT c.item_name FROM sys_dict c WHERE c.class_code='1001001' AND c.item_value=a.level_code) levelName,
+        (SELECT c.item_name FROM sys_dict c WHERE c.class_code='1001002' AND c.item_value=a.classification_code) classificationName
+        from sys_organ a
+        order by id
+    </select>
 </mapper>

@@ -41,6 +41,15 @@ public interface SysConstants {
     }
 
     /**
+     * 操作类型
+     */
+    interface OperationType {
+        int ADD = 1;
+
+        int UPDATE = 2;
+    }
+
+    /**
      * 字符串起始索引
      */
     int STRING_START_INDEX = 0;

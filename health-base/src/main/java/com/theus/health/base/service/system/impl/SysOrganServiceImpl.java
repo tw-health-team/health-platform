@@ -5,11 +5,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.theus.health.base.common.constants.SysConstants;
 import com.theus.health.base.mapper.system.SysOrganMapper;
+import com.theus.health.base.model.dto.system.organ.FindOrganDTO;
 import com.theus.health.base.model.dto.system.organ.OrganAddDTO;
 import com.theus.health.base.model.dto.system.organ.OrganUpdateDTO;
-import com.theus.health.base.model.dto.system.organ.FindOrganDTO;
 import com.theus.health.base.model.po.system.SysOrgan;
-import com.theus.health.base.service.global.impl.BaseServiceImpl;
 import com.theus.health.base.service.system.SysOrganService;
 import com.theus.health.base.util.ShiroUtils;
 import com.theus.health.core.exception.BusinessException;
@@ -17,10 +16,7 @@ import com.theus.health.core.util.ChinesePinyinUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author tangwei
@@ -41,6 +37,7 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
 
     @Override
     public void add(OrganAddDTO addDTO) {
+        // 校验
         SysOrgan findOrgan = this.findById(addDTO.getId());
         if (findOrgan != null) {
             throw BusinessException.fail(String.format("已经存在机构ID为 %s 的机构", addDTO.getId()));
@@ -49,18 +46,11 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
         if (findOrgan != null) {
             throw BusinessException.fail(String.format("已经存在机构名为 %s 的机构", addDTO.getName()));
         }
+        // 转换实体
         findOrgan = new SysOrgan();
         BeanUtils.copyProperties(addDTO, findOrgan);
-        // 上级机构为空 则赋默认值
-        if (StrUtil.isBlank(findOrgan.getParentId())) {
-            findOrgan.setParentId(SysConstants.TOP_DEPT_CODE);
-        }
-        // 获取机构名称的拼音首字母
-        findOrgan.setSimpleSpelling(ChinesePinyinUtil.getPinYinHeadChar(findOrgan.getName()));
-        // 赋值新增固定字段
-        ShiroUtils.setInsert(findOrgan);
         // 完善机构数据
-        this.completeOrgan(findOrgan);
+        this.completeOrgan(findOrgan, SysConstants.OperationType.ADD);
         this.save(findOrgan);
     }
 
@@ -76,17 +66,15 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
             // 获取机构名称的拼音首字母
             organ.setSimpleSpelling(ChinesePinyinUtil.getPinYinHeadChar(updateDTO.getName()));
         }
-        SysOrgan findDept = this.getOne(new QueryWrapper<SysOrgan>()
+        SysOrgan findOrgan = this.getOne(new QueryWrapper<SysOrgan>()
                 .eq("name", updateDTO.getName()).ne("id", id));
-        if (findDept != null) {
+        if (findOrgan != null) {
             throw BusinessException.fail(
                     String.format("更新失败，已经存在机构名为 %s 的机构", updateDTO.getName()));
         }
         BeanUtils.copyProperties(updateDTO, organ);
         // 完善机构数据
-        this.completeOrgan(organ);
-        // 赋值修改固定字段
-        ShiroUtils.setUpdate(organ);
+        this.completeOrgan(organ, SysConstants.OperationType.UPDATE);
         try {
             this.updateById(organ);
         } catch (BusinessException e) {
@@ -100,8 +88,9 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
      * 完善机构信息
      *
      * @param sysOrgan 机构
+     * @param type     操作类型
      */
-    private void completeOrgan(SysOrgan sysOrgan) {
+    private void completeOrgan(SysOrgan sysOrgan, int type) {
         if (sysOrgan != null) {
             String locationCode = sysOrgan.getLocationProvinceCode();
             String locationName = sysOrgan.getLocationProvinceName();
@@ -120,33 +109,20 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
             }
             sysOrgan.setLocationCode(locationCode);
             sysOrgan.setLocationName(locationName);
-        }
-    }
-
-    @Override
-    public List<SysOrgan> findTree(FindOrganDTO findOrganDTO) {
-        List<SysOrgan> sysOrgans = new ArrayList<>();
-        String name = findOrganDTO.getName();
-        List<SysOrgan> sysOrganList;
-        // 查询条件为空 直接查询所有机构数据后生成树形结构
-        if (StrUtil.isBlank(name)) {
-            sysOrganList = this.baseMapper.list(findOrganDTO);
-            sysOrgans = initTree(sysOrganList);
-        } else {
-            // 根据条件查询机构
-            sysOrganList = this.baseMapper.list(findOrganDTO);
-            // 循环机构列表
-            for (SysOrgan organ : sysOrganList) {
-                // 将所有机构置为第一层
-                organ.setTreeLayer(0);
-                sysOrgans.add(organ);
+            if (type == SysConstants.OperationType.ADD) {
+                // 上级机构为空 则赋默认值
+                if (StrUtil.isBlank(sysOrgan.getParentId())) {
+                    sysOrgan.setParentId(SysConstants.TOP_DEPT_CODE);
+                }
+                // 获取机构名称的拼音首字母
+                sysOrgan.setSimpleSpelling(ChinesePinyinUtil.getPinYinHeadChar(sysOrgan.getName()));
+                // 赋值新增固定字段
+                ShiroUtils.setInsert(sysOrgan);
+            } else {
+                // 赋值修改固定字段
+                ShiroUtils.setUpdate(sysOrgan);
             }
-            // 根据机构列表生成机构树
-            findChildren(sysOrgans, new ArrayList<>(sysOrgans));
-            // 去除重复的机构
-            sysOrgans = removeDuplicate(sysOrganList);
         }
-        return sysOrgans;
     }
 
     @Override
@@ -171,123 +147,204 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
         List<SysOrgan> children = this.list(new QueryWrapper<SysOrgan>()
                 .eq("parent_id", organId));
         List<SysOrgan> grandChildren = new ArrayList<>();
-        children.forEach(v -> {
-            grandChildren.addAll(this.getChildren(v.getId()));
-        });
+        children.forEach(v -> grandChildren.addAll(this.getChildren(v.getId())));
         children.addAll(grandChildren);
         return children;
     }
 
     /**
-     * 根据机构列表生成机构树
+     * 获取所有机构
+     *
+     * @return 机构列表
+     */
+    private List<SysOrgan> findAllOrgans() {
+        return this.baseMapper.all();
+    }
+
+    @Override
+    public List<SysOrgan> findTree(FindOrganDTO findOrganDTO) {
+        List<SysOrgan> sysOrgans;
+        String name = findOrganDTO.getName();
+        // 1、获取所有机构
+        List<SysOrgan> allOrgans = this.findAllOrgans();
+        // 登录用户的机构id
+        String loginOrganId = ShiroUtils.getUser().getOrganId();
+        // 2、获取登录机构及下级机构列表,id为空 则获取所有
+        sysOrgans = this.getOrganList(loginOrganId, allOrgans);
+        // 3、过滤文本不为空 则过滤
+        sysOrgans = this.listToTreeByKeywords(sysOrgans, name);
+        return sysOrgans;
+    }
+
+    /**
+     * 根据机构id从所有机构列表中获取自身及下级机构
+     *
+     * @param organId   机构id
+     * @param allOrgans 所有机构
+     * @return 自身及下级机构列表
+     */
+    private List<SysOrgan> getOrganList(String organId, List<SysOrgan> allOrgans) {
+        List<SysOrgan> parentList = new ArrayList<>();
+        if (StrUtil.isNotBlank(organId)) {
+            // 获取登录机构信息
+            SysOrgan organ = null;
+            for (SysOrgan sysOrgan : allOrgans) {
+                if (sysOrgan.getId().equals(organId)) {
+                    organ = sysOrgan;
+                }
+            }
+            allOrgans.remove(organ);
+            parentList.add(organ);
+            // 获取子集
+            List<SysOrgan> childList = this.getChildList(parentList, new ArrayList<>(), new HashMap<>(20), allOrgans);
+            parentList.addAll(childList);
+        } else {
+            parentList = allOrgans;
+        }
+        return parentList;
+    }
+
+    /**
+     * 说明方法描述：使list转换为树并根据关键字和节点名称过滤
      *
      * @param organList 机构列表
-     * @return 机构树
+     * @param keywords  要过滤的关键字
+     * @return 树结构
      */
-    private List<SysOrgan> initTree(List<SysOrgan> organList) {
-        List<SysOrgan> sysDepts = new ArrayList<>();
-        if (organList != null) {
-            // 循环机构列表
-            for (SysOrgan organ : organList) {
-                // 保存顶级机构
-                if (SysConstants.TOP_DEPT_CODE.equals(organ.getParentId())) {
-                    organ.setTreeLayer(0);
-                    sysDepts.add(organ);
-                }
-            }
-            // order_num升序
-            organList.sort(Comparator.comparing(SysOrgan::getOrderNum));
-            // 根据顶级机构和机构列表生成机构树
-            findChildren(sysDepts, organList);
-        }
-        return sysDepts;
-    }
-
-    /**
-     * 根据上级机构和机构列表生成机构树
-     *
-     * @param sysOrgans 上级机构list
-     * @param organs    机构列表
-     */
-    private void findChildren(List<SysOrgan> sysOrgans, List<SysOrgan> organs) {
-        // 循环上级机构
-        for (SysOrgan sysOrgan : sysOrgans) {
-            List<SysOrgan> children = new ArrayList<>();
-            // 循环机构列表
-            for (SysOrgan organ : organs) {
-                // 将机构列表中的父id是上级机构的id的机构存入子机构列表
-                if (sysOrgan.getId().equals(organ.getParentId())) {
-                    organ.setParentName(sysOrgan.getName());
-                    organ.setTreeLayer(sysOrgan.getTreeLayer() + 1);
-                    children.add(organ);
-                }
-            }
-            // order_num升序
-            children.sort(Comparator.comparing(SysOrgan::getOrderNum));
-            sysOrgan.setChildren(children);
-            findChildren(children, organs);
-        }
-    }
-
-    /**
-     * 获取机构的下级机构信息
-     *
-     * @param sysOrgan 机构信息
-     */
-    private void findChildren(SysOrgan sysOrgan) {
-        List<SysOrgan> sysOrgans = this.list(new QueryWrapper<SysOrgan>()
-                .eq("parent_id", sysOrgan.getId())
-                .orderByAsc("order_num"));
-        sysOrgans.forEach(v -> v.setParentName(sysOrgan.getName()));
-        sysOrgan.setChildren(sysOrgans);
-        // 循环机构列表
-        for (SysOrgan organ : sysOrgans) {
-            findChildren(organ);
-        }
-    }
-
-    private List<SysOrgan> removeDuplicate(List<SysOrgan> organList) {
-        List<SysOrgan> sysDepts = new ArrayList<>();
-        // 循环机构
-        for (SysOrgan organ : organList) {
-            boolean isExists = false;
-            // 循环其他机构，判断是否存在于其他机构的子机构中
-            for (SysOrgan otherDept : organList) {
-                if (!organ.getId().equals(otherDept.getId())) {
-                    if (isExistsInList(organ, otherDept.getChildren())) {
-                        isExists = true;
-                        break;
+    private List<SysOrgan> listToTreeByKeywords(List<SysOrgan> organList, String keywords) {
+        List<SysOrgan> resultList = new ArrayList<>();
+        // 1.过滤并获取子集
+        if (StrUtil.isNotBlank(keywords)) {
+            if (organList.size() > 0) {
+                Iterator<SysOrgan> iterator = organList.iterator();
+                while (iterator.hasNext()) {
+                    SysOrgan sysOrgan = iterator.next();
+                    // 名称、简称、简拼包含过滤关键字,则保存
+                    if (sysOrgan.getName().contains(keywords) || sysOrgan.getShortName().contains(keywords)
+                            || sysOrgan.getSimpleSpelling().contains(keywords)) {
+                        resultList.add(sysOrgan);
+                        // 从列表删除
+                        iterator.remove();
                     }
                 }
             }
-            // 若不存在与其他机构的子机构中则保留
-            if (!isExists) {
-                sysDepts.add(organ);
-            }
+            // 获取子集
+            List<SysOrgan> childList = this.getChildList(resultList, new ArrayList<>(), new HashMap<>(20), organList);
+            resultList.addAll(childList);
+        } else {
+            resultList = organList;
         }
-        return sysDepts;
+        // 3.将list集转为树tree结构
+        resultList = this.listOrganToTree(resultList);
+        return resultList;
     }
 
     /**
-     * 是否存在于列表
+     * 获取子集list
      *
-     * @param sysDept   实体
-     * @param organList 实体list
-     * @return 是否
+     * @param parentList  父集
+     * @param resultList  结果集
+     * @param filteredMap 用于过滤子集的map
+     * @param allOrgans   所有机构
+     * @return 子集
      */
-    private boolean isExistsInList(SysOrgan sysDept, List<SysOrgan> organList) {
-        boolean exists = false;
-        if (organList != null) {
-            for (SysOrgan otherDept : organList) {
-                if (sysDept.getId().equals(otherDept.getId())) {
-                    exists = true;
-                    break;
+    private List<SysOrgan> getChildList(List<SysOrgan> parentList, List<SysOrgan> resultList,
+                                        Map<String, SysOrgan> filteredMap, List<SysOrgan> allOrgans) {
+        // 获取的子集
+        List<SysOrgan> childList = new ArrayList<>();
+        if (allOrgans != null && allOrgans.size() > 0
+                && parentList != null && parentList.size() > 0) {
+            for (SysOrgan parent : parentList) {
+                String parentId = parent.getId();
+                Iterator<SysOrgan> iterator = allOrgans.iterator();
+                while (iterator.hasNext()) {
+                    SysOrgan resource = iterator.next();
+                    // 获取子资源
+                    if (!filteredMap.containsKey(parentId) && parentId.equals(resource.getParentId())) {
+                        // 存储获取到的子集
+                        filteredMap.put(resource.getId(), resource);
+                        // 保存结果集
+                        resultList.add(resource);
+                        // 保存此次循环得到的子集 用于下次循环
+                        childList.add(resource);
+                        iterator.remove();
+                    }
                 }
-                if (!exists) {
-                    exists = isExistsInList(sysDept, otherDept.getChildren());
+            }
+            this.getChildList(childList, resultList, filteredMap, allOrgans);
+        }
+        return resultList;
+    }
+
+    /**
+     * 说明方法描述：将list转为树tree结构
+     *
+     * @param allOrgans 所有机构
+     * @return 树结构
+     */
+    private List<SysOrgan> listOrganToTree(List<SysOrgan> allOrgans) {
+        List<SysOrgan> listParent = new ArrayList<>();
+        if (allOrgans != null && allOrgans.size() > 0) {
+            List<SysOrgan> listNotParent = new ArrayList<>();
+            // 第一步：保存所有的id
+            List<String> allID = new ArrayList<>();
+            for (SysOrgan sysOrgan : allOrgans) {
+                String id = sysOrgan.getId();
+                allID.add(id);
+            }
+            // 第二步：遍历allOrgans找出所有的根节点和非根节点
+            for (SysOrgan sysOrgan : allOrgans) {
+                String parentId = sysOrgan.getParentId();
+                if (!allID.contains(parentId)) {
+                    listParent.add(sysOrgan);
+                } else {
+                    listNotParent.add(sysOrgan);
+                }
+            }
+            // 第三步： 递归获取所有子节点
+            this.createTree(listParent, listNotParent);
+        }
+        return listParent;
+    }
+
+    /**
+     * 根据父节点和非父节点生成树
+     *
+     * @param listParent    父节点
+     * @param listNotParent 非父节点
+     */
+    private void createTree(List<SysOrgan> listParent, List<SysOrgan> listNotParent) {
+        if (listParent.size() > 0) {
+            for (SysOrgan organ : listParent) {
+                // 添加所有子级
+                organ.setChildren(this.getChildTree(listNotParent, organ.getId()));
+            }
+        }
+    }
+
+    /**
+     * 根据机构列表生成机构树
+     *
+     * @param childList 机构列表
+     * @param parentId  父级id
+     * @return 资源树
+     */
+    private List<SysOrgan> getChildTree(List<SysOrgan> childList, String parentId) {
+        List<SysOrgan> parentList = new ArrayList<>();
+        List<SysOrgan> notParentList = new ArrayList<>();
+        // 遍历childList，找出所有的根节点和非根节点
+        if (childList != null && childList.size() > 0) {
+            for (SysOrgan organ : childList) {
+                // 对比找出父节点
+                if (organ.getParentId().equals(parentId)) {
+                    parentList.add(organ);
+                } else {
+                    notParentList.add(organ);
                 }
             }
         }
-        return exists;
+        // 递归获取所有子节点
+        this.createTree(parentList, notParentList);
+        return parentList;
     }
 }

@@ -18,6 +18,12 @@ public interface SysResourceService extends IService<SysResource> {
      * 获取资源列表
      * @return 资源列表
      */
+    List<SysResource> findAllResource();
+
+    /**
+     * 获取资源树
+     * @return 资源树
+     */
     List<SysResource> treeList();
 
     /**
