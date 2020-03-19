@@ -29,6 +29,13 @@ public interface SysOrganService extends IService<SysOrgan> {
     SysOrgan findByName(String name);
 
     /**
+     * 根据机构ID查找子集
+     * @param id 机构ID
+     * @return 子机构列表
+     */
+    List<SysOrgan> findChildren(String id);
+
+    /**
      * 添加机构
      * @param addDTO 机构数据DTO
      */

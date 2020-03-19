@@ -47,4 +47,31 @@ public class DictConstants {
             return name;
         }
     }
+
+    /**
+     * 数据删除标志
+     */
+    public enum delFlag{
+        /**
+         * 正常
+         */
+        NORMAL(0,"正常"),
+        /**
+         * 已删除
+         */
+        DELETED(1,"删除");
+
+        delFlag(Integer value,String name){
+            this.value = value;
+            this.name = name;
+        }
+        private final Integer value;
+        private final String name;
+        public Integer getValue() {
+            return value;
+        }
+        public String getName() {
+            return name;
+        }
+    }
 }

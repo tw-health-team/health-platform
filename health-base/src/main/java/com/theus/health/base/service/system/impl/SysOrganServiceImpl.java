@@ -3,6 +3,7 @@ package com.theus.health.base.service.system.impl;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.theus.health.base.common.constants.DictConstants;
 import com.theus.health.base.common.constants.SysConstants;
 import com.theus.health.base.mapper.system.SysOrganMapper;
 import com.theus.health.base.model.dto.system.organ.FindOrganDTO;
@@ -25,14 +26,24 @@ import java.util.*;
 @Service
 public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> implements SysOrganService {
 
+    /**
+     * 未删除标志
+     */
+    private final int NOT_DELETED = DictConstants.delFlag.NORMAL.getValue();
+
     @Override
     public SysOrgan findById(String id) {
-        return this.getOne(new QueryWrapper<SysOrgan>().eq("id", id));
+        return this.getOne(new QueryWrapper<SysOrgan>().eq("id", id).eq("del_flag", this.NOT_DELETED));
     }
 
     @Override
     public SysOrgan findByName(String name) {
-        return this.getOne(new QueryWrapper<SysOrgan>().eq("name", name));
+        return this.getOne(new QueryWrapper<SysOrgan>().eq("name", name).eq("del_flag", this.NOT_DELETED));
+    }
+
+    @Override
+    public List<SysOrgan> findChildren(String id) {
+        return this.list(new QueryWrapper<SysOrgan>().eq("parent_id", id).eq("del_flag", this.NOT_DELETED));
     }
 
     @Override
@@ -67,7 +78,7 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
             organ.setSimpleSpelling(ChinesePinyinUtil.getPinYinHeadChar(updateDTO.getName()));
         }
         SysOrgan findOrgan = this.getOne(new QueryWrapper<SysOrgan>()
-                .eq("name", updateDTO.getName()).ne("id", id));
+                .eq("name", updateDTO.getName()).ne("id", id).eq("del_flag", this.NOT_DELETED));
         if (findOrgan != null) {
             throw BusinessException.fail(
                     String.format("更新失败，已经存在机构名为 %s 的机构", updateDTO.getName()));
@@ -129,9 +140,8 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
     public List<SysOrgan> getOrganAndAllSubNode(String organId) {
         List<SysOrgan> sysOrgans = new ArrayList<>();
         List<SysOrgan> children;
-        SysOrgan sysOrgan = this.getOne(new QueryWrapper<SysOrgan>()
-                .eq("id", organId));
-        children = this.getChildren(organId);
+        SysOrgan sysOrgan = this.findById(organId);
+        children = this.getAllSubNode(organId);
         sysOrgans.add(sysOrgan);
         sysOrgans.addAll(children);
         return sysOrgans;
@@ -143,11 +153,10 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
      * @param organId 机构id
      * @return 所有下级机构list
      */
-    private List<SysOrgan> getChildren(String organId) {
-        List<SysOrgan> children = this.list(new QueryWrapper<SysOrgan>()
-                .eq("parent_id", organId));
+    private List<SysOrgan> getAllSubNode(String organId) {
+        List<SysOrgan> children = this.findChildren(organId);
         List<SysOrgan> grandChildren = new ArrayList<>();
-        children.forEach(v -> grandChildren.addAll(this.getChildren(v.getId())));
+        children.forEach(v -> grandChildren.addAll(this.getAllSubNode(v.getId())));
         children.addAll(grandChildren);
         return children;
     }
