@@ -105,36 +105,12 @@ public class SysDeptCenterServiceImpl extends ServiceImpl<SysDeptCenterMapper, S
         sysDeptCenters = sysDeptCenterMapper.findTree(findDeptCenterDTO);
         for (SysDeptCenter deptCenter : sysDeptCenters) {
             // 保存顶级机构
-            if (StrUtil.isBlank(deptCenter.getParentId())) {
-                deptCenter.setLevel(0);
-            }
+            deptCenter.setLevel(0);
         }
         //循环生成子节点
         findChildren(sysDeptCenters,new ArrayList<>(sysDeptCenters));
         // 去除重复的字典
         sysDeptCenters = removeDuplicate(sysDeptCenters);
-        return sysDeptCenters;
-    }
-
-    /**
-     * 根中心科室列表生成中心科室树
-     * @param DeptCenterList 中心科室列表
-     * @return 中心科室树
-     */
-    private List<SysDeptCenter> initTree(List<SysDeptCenter> DeptCenterList){
-        List<SysDeptCenter> sysDeptCenters = new ArrayList<>();
-        if (DeptCenterList != null) {
-            // 循环字典列表
-            for (SysDeptCenter DeptCenter : DeptCenterList) {
-                // 保存顶级字典
-                if (DeptCenter.getParentId() == null || "0".equals(DeptCenter.getParentId())) {
-                    DeptCenter.setLevel(0);
-                    sysDeptCenters.add(DeptCenter);
-                }
-            }
-            // 根据顶级字典和字典列表生成字典树
-            findChildren(sysDeptCenters, DeptCenterList);
-        }
         return sysDeptCenters;
     }
 
