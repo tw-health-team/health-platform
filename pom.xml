@@ -28,6 +28,7 @@
         <module>health-main</module>
         <module>health-booking</module>
         <module>elderly-care</module>
+        <module>health-empi</module>
     </modules>
 
     <!-- 属性说明 -->
@@ -167,6 +168,12 @@
             <dependency>
                 <groupId>com.theus</groupId>
                 <artifactId>elderly-care</artifactId>
+                <version>${health.version}</version>
+            </dependency>
+            <!--empi模块-->
+            <dependency>
+                <groupId>com.theus</groupId>
+                <artifactId>health-empi</artifactId>
                 <version>${health.version}</version>
             </dependency>
             <!-- Swagger -->
