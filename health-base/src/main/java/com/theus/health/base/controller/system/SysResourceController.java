@@ -1,6 +1,9 @@
 package com.theus.health.base.controller.system;
 
 import com.theus.health.base.common.annotation.SysLogs;
+import com.theus.health.base.common.constants.ResourceConstants;
+import com.theus.health.base.common.constants.SysConstants;
+import com.theus.health.base.model.dto.system.resource.FindResourceDTO;
 import com.theus.health.base.model.dto.system.resource.ResourceDTO;
 import com.theus.health.base.service.system.SysResourceService;
 import com.theus.health.core.bean.ResponseCode;
@@ -67,6 +70,14 @@ public class SysResourceController {
     @SysLogs("获取用户菜单树")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
     public ResponseResult navTree(@PathVariable("username") @ApiParam("用户名") String username) {
-        return ResponseResult.e(ResponseCode.OK,resourceService.findTree(username, 1));
+        return ResponseResult.e(ResponseCode.OK,resourceService.findTree(username, ResourceConstants.ResultType.NO_BUTTON));
+    }
+
+    @PostMapping(value = {"/tree"})
+    @ApiOperation(value = "根据查询条件获取资源树")
+    @SysLogs("根据查询条件获取资源树")
+    @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
+    public ResponseResult tree(@RequestBody @Validated @ApiParam("过滤文本") FindResourceDTO findResourceDTO){
+        return ResponseResult.e(ResponseCode.OK,resourceService.treeList(findResourceDTO.getSearchText().trim()));
     }
 }

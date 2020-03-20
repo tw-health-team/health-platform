@@ -1,5 +1,6 @@
 package com.theus.health.base.model.po.system;
 
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.Data;
 
 import java.util.Date;
@@ -32,5 +33,6 @@ public class BaseModel {
 
     private Date updateTime;
 
+    @TableLogic
     private Byte delFlag;
 }

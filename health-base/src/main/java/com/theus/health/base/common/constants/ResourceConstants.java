@@ -26,4 +26,18 @@ public class ResourceConstants {
         BUTTON
     }
 
+    /**
+     * 结果类型
+     */
+    public enum ResultType{
+        /**
+         * 包含按钮
+         */
+        WITH_BUTTON,
+        /**
+         * 不包含按钮
+         */
+        NO_BUTTON
+    }
+
 }

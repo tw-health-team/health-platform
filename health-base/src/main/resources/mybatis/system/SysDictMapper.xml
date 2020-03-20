@@ -77,7 +77,7 @@
     </select>
 
     <insert id="insertDictClass" parameterType="com.theus.health.base.model.po.system.SysDictClass">
-        insert into sys_dict_class (id, parent_id, code, name, simple_spelling,simple_spelling, sort, remarks)
+        insert into sys_dict_class (id, parent_id, code, name, simple_spelling,simple_wubi, sort, remarks)
         values (#{id,jdbcType=VARCHAR}, #{parentId,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR},
                 #{name,jdbcType=NVARCHAR}, #{simpleSpelling,jdbcType=NVARCHAR}, #{simpleWubi,jdbcType=NVARCHAR},
                 #{sort,jdbcType=INTEGER}, #{remarks,jdbcType=NVARCHAR})

@@ -37,7 +37,7 @@ mybatis-plus:
   # MyBatis Mapper 所对应的 XML 文件位置
   mapper-locations: classpath*:mybatis/*.xml,classpath*:mybatis/*/*.xml
   # MyBaits 别名包扫描路径，多个package用逗号或者分号分隔
-  type-aliases-package: com.theus.health.*.entity.*
+  type-aliases-package: com.theus.health.*.model.*,com.theus.health.*.model.*.*
   configuration:
     # 是否开启自动驼峰命名规则（camel case）映射，
     # 即从经典数据库列名 A_COLUMN（下划线命名） 到经典 Java 属性名 aColumn（驼峰命名） 的类似映射

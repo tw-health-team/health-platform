@@ -1,6 +1,7 @@
 package com.theus.health.base.model.po.system;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,7 @@ public class SysArea {
     /**
      * 区划ID
      */
+    @TableId
     private String id;
 
     /**

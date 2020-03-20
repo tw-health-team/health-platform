@@ -117,4 +117,12 @@ public class SysUserController {
     public ResponseResult permissions(@PathVariable("username") @ApiParam("用户名") String username) {
         return ResponseResult.e(ResponseCode.OK,sysUserService.findPermissions(username));
     }
+
+    @GetMapping(value="/userInfo/{username}")
+    @ApiOperation(value = "获取用户操作权限")
+    @SysLogs("获取用户操作权限")
+    @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
+    public ResponseResult getUserByName(@PathVariable("username") @ApiParam("用户名") String username) {
+        return ResponseResult.e(ResponseCode.OK,sysUserService.getUserInfo(username));
+    }
 }

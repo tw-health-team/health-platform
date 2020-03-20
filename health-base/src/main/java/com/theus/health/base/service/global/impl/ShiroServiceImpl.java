@@ -34,57 +34,50 @@ public class ShiroServiceImpl implements ShiroService {
 
     @Override
     public Map<String, String> getFilterChainDefinitionMap() {
-
-        Map<String,String> filterChainDefinitionMap = new LinkedHashMap<>();
+        Map<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
         List<String[]> permsList = new LinkedList<>();
         List<String[]> anonList = new LinkedList<>();
 
-        List<SysResource> resources = resourceService.treeList();
-
-        if(resources!=null){
+        List<SysResource> resources = resourceService.findAllResource();
+        if (resources != null) {
             for (SysResource resource : resources) {
-                if(!StringUtils.isEmpty(resource.getUrl()) && !StringUtils.isEmpty(resource.getPermission())){
-                    if(!"".equals(resource.getPermission().trim())) {
+                if (!StringUtils.isEmpty(resource.getUrl()) && !StringUtils.isEmpty(resource.getPermission())) {
+                    if (!"".equals(resource.getPermission().trim())) {
                         //判断是否需要权限验证
                         isNeedVerify(permsList, anonList, resource);
                     }
                 }
-                iterationAllResourceInToFilter(resource,permsList,anonList);
+                iterationAllResourceInToFilter(resource, permsList, anonList);
             }
         }
-
-
         for (String[] strings : anonList) {
-            filterChainDefinitionMap.put(strings[0],strings[1]);
+            filterChainDefinitionMap.put(strings[0], strings[1]);
         }
-
         for (String[] strings : permsList) {
-            filterChainDefinitionMap.put(strings[0],strings[1]);
+            filterChainDefinitionMap.put(strings[0], strings[1]);
         }
-
         filterChainDefinitionMap.put("/**", "anon");
-
         return filterChainDefinitionMap;
     }
 
     @Override
     public void iterationAllResourceInToFilter(SysResource resource,
-                                               List<String[]> permsList, List<String[]> anonList){
-        if(resource.getChildren()!=null && resource.getChildren().size()>0){
+                                               List<String[]> permsList, List<String[]> anonList) {
+        if (resource.getChildren() != null && resource.getChildren().size() > 0) {
             for (SysResource v : resource.getChildren()) {
-                if(!StringUtils.isEmpty(v.getUrl()) && !StringUtils.isEmpty(v.getPermission())){
+                if (!StringUtils.isEmpty(v.getUrl()) && !StringUtils.isEmpty(v.getPermission())) {
                     isNeedVerify(permsList, anonList, v);
-                    iterationAllResourceInToFilter(v,permsList,anonList);
+                    iterationAllResourceInToFilter(v, permsList, anonList);
                 }
             }
         }
     }
 
     private void isNeedVerify(List<String[]> permsList, List<String[]> anonList, SysResource v) {
-        if(v.getVerification()){
-            permsList.add(0,new String[]{v.getUrl()+"/**","perms["+v.getPermission()+":*]"});
-        }else{
-            anonList.add(0,new String[]{v.getUrl()+"/**","anon"});
+        if (v.getVerification()) {
+            permsList.add(0, new String[]{v.getUrl() + "/**", "perms[" + v.getPermission() + ":*]"});
+        } else {
+            anonList.add(0, new String[]{v.getUrl() + "/**", "anon"});
         }
     }
 
@@ -97,7 +90,7 @@ public class ShiroServiceImpl implements ShiroService {
         try {
             abstractShiroFilter = (AbstractShiroFilter) shiroFilterFactoryBean.getObject();
         } catch (Exception e) {
-            throw new BusinessException(ResponseCode.FAIL.code,"重新加载权限失败",e);
+            throw new BusinessException(ResponseCode.FAIL.code, "重新加载权限失败", e);
         }
         PathMatchingFilterChainResolver filterChainResolver = null;
         if (abstractShiroFilter != null) {
@@ -124,14 +117,14 @@ public class ShiroServiceImpl implements ShiroService {
     }
 
     @Override
-    public void clearAuthByUserId(String uid,Boolean author, Boolean out){
+    public void clearAuthByUserId(String uid, Boolean author, Boolean out) {
         MyRealm myRealm = SpringUtil.getBean(MyRealm.class);
-        myRealm.clearAuthByUserId(uid,author,out);
+        myRealm.clearAuthByUserId(uid, author, out);
     }
 
     @Override
     public void clearAuthByUserIdCollection(List<String> userList, Boolean author, Boolean out) {
         MyRealm myRealm = SpringUtil.getBean(MyRealm.class);
-        myRealm.clearAuthByUserIdCollection(userList,author,out);
+        myRealm.clearAuthByUserIdCollection(userList, author, out);
     }
 }

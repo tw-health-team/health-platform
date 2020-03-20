@@ -38,6 +38,10 @@ public class SysResource implements Serializable {
 
     private String icon;
 
+    private String systemId;
+
+    private String simpleSpelling;
+
     private Integer sort;
 
     private Boolean verification;
