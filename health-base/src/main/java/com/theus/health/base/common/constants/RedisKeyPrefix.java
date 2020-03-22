@@ -13,4 +13,9 @@ public interface RedisKeyPrefix {
      * 系统管理员用户名
      */
     String USER = SYSTEM + SEPARATOR + "sys.user.";
+
+    /**
+     * 字典项
+     */
+    String DICT = SYSTEM + SEPARATOR + "sys.dict.";
 }

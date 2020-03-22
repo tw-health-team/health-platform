@@ -21,17 +21,11 @@ public interface SysDictService extends IService<SysDict> {
     List<SysDict> findList(FindDictDTO findDictDTO);
 
     /**
-     * 根据分类查询
+     * 根据分类查询(先查redis，找不到查数据库）
      * @param classCode 字典分类代码
      * @return 字典信息
      */
     List<SysDictDTO> findByType(String classCode);
-
-    /**
-     * 获取字典分类树
-     * @return 字典分类树
-     */
-    List<DictClassVO> findDictClassTree();
 
     /**
      * 添加字典项
@@ -46,11 +40,23 @@ public interface SysDictService extends IService<SysDict> {
     void updateDictItem(DictUpdateDTO dictUpdateDTO);
 
     /**
+     * 删除字典项
+     * @param id 字典ID
+     */
+    void removeDictItem(String id);
+
+    /**
      * 是否存在字典项
      * @param existsQueryDTO 字典
      * @return 是否
      */
     boolean existsDict(DictExistsQueryDTO existsQueryDTO);
+
+    /**
+     * 获取字典分类树
+     * @return 字典分类树
+     */
+    List<DictClassVO> findDictClassTree();
 
     /**
      * 查询字典分类树列表数据

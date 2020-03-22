@@ -1,13 +1,12 @@
 package com.theus.health.base.util;
 
+import com.alibaba.fastjson.JSON;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Redis工具类
@@ -51,33 +50,62 @@ public class RedisUtil {
      * @param value String、Map、List、SortedSet、Set
      */
     @SuppressWarnings("unchecked")
-    public void add(String key, Object value) {
+    public void add(String key, Object value, long timeout, TimeUnit timeUnit) {
         try {
             if (value instanceof String) {
-                redisTemplate.opsForValue().set(key, value);
+                if (timeout > 0) {
+                    redisTemplate.opsForValue().set(key, value, timeout, timeUnit);
+                } else {
+                    redisTemplate.opsForValue().set(key, value);
+                }
             } else if (value instanceof Map) {
                 Map<String, Object> map = (Map<String, Object>) value;
                 for (String hashKey : map.keySet()) {
                     redisTemplate.opsForHash().put(key, hashKey, map.get(hashKey));
+                    this.expire(key, timeout, timeUnit);
                 }
             } else if (value instanceof List) {
                 List<Object> list = (List<Object>) value;
                 redisTemplate.opsForList().leftPushAll(key, list);
+                this.expire(key, timeout, timeUnit);
             } else if (value instanceof SortedSet) {
                 SortedSet<Object> sortedSet = (SortedSet<Object>) value;
                 for (Object object : sortedSet) {
                     redisTemplate.opsForZSet().add(key, object, 0);
+                    this.expire(key, timeout, timeUnit);
                 }
             } else if (value instanceof Set) {
                 Set<Object> set = (Set<Object>) value;
                 for (Object object : set) {
                     redisTemplate.opsForSet().add(key, object);
+                    this.expire(key, timeout, timeUnit);
                 }
             } else {
-                redisTemplate.opsForValue().set(key, value);
+                if (timeout > 0) {
+                    redisTemplate.opsForValue().set(key, value, timeout, timeUnit);
+                } else {
+                    redisTemplate.opsForValue().set(key, value);
+                }
             }
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    /**
+     * 指定缓存失效时间
+     *
+     * @param key  键
+     * @param time 时间
+     * @param timeUnit 时间单位
+     */
+    private void expire(String key, long time, TimeUnit timeUnit) {
+        try {
+            if (time > 0) {
+                redisTemplate.expire(key, time, timeUnit);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -89,6 +117,27 @@ public class RedisUtil {
      */
     public Object getObject(String key) {
         return redisTemplate.opsForValue().get(key);
+    }
+
+    /**
+     * 从Redis中取出实体list数据
+     *
+     * @param cacheId     主键
+     * @param targetClass 泛型类
+     * @param <T>         声明泛型
+     * @return list
+     */
+    public <T> List<T> getList(String cacheId, Class<T> targetClass) {
+        List<T> list = new ArrayList<>();
+        List<Object> objectList = redisTemplate.opsForList().range(cacheId, 0, -1);
+        if (objectList != null) {
+            objectList.forEach(v -> {
+                if (targetClass.isInstance(v)) {
+                    list.add(targetClass.cast(v));
+                }
+            });
+        }
+        return list;
     }
 
     /**

@@ -22,7 +22,7 @@ import java.util.List;
 public interface SysDictMapper extends BaseMapper<SysDict> {
 
     /**
-     * 查询用户列表
+     * 查询字典列表
      * @param findUserDTO 查询条件
      * @return 用户list
      */
@@ -35,7 +35,8 @@ public interface SysDictMapper extends BaseMapper<SysDict> {
     List<SysDictClass> findAllDictClasses();
 
     /**
-     * 查询字典分类数据
+     * * 查询字典分类数据
+     * @param findClassVO 条件
      * @return 字典分类list
      */
     List<SysDictClass> findDictClassList(@Param("param") FindClassVO findClassVO);
