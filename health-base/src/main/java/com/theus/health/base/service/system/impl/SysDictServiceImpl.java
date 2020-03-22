@@ -1,6 +1,7 @@
 package com.theus.health.base.service.system.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.theus.health.base.common.constants.SysConstants;
@@ -9,6 +10,7 @@ import com.theus.health.base.model.dto.system.dict.*;
 import com.theus.health.base.model.po.system.SysDict;
 import com.theus.health.base.model.po.system.SysDictClass;
 import com.theus.health.base.model.vo.dict.*;
+import com.theus.health.base.service.system.RedisService;
 import com.theus.health.base.service.system.SysDictService;
 import com.theus.health.core.exception.BusinessException;
 import com.theus.health.core.util.BaseConverter;
@@ -18,6 +20,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -27,25 +30,30 @@ import java.util.UUID;
  * @date 2019-10-07 22:16
  */
 @Service
-public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> implements SysDictService{
+public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> implements SysDictService {
+    @Resource
+    private RedisService redisService;
+
     @Override
     public List<SysDict> findList(FindDictDTO findDictDTO) {
         return this.baseMapper.findList(findDictDTO);
     }
 
     @Override
-    public List<SysDictDTO> findByType(String type) {
-        List<SysDict> sysDictList = this.baseMapper.selectList(
-                new QueryWrapper<SysDict>()
-                        .eq("class_code", type)
-                        .select("class_code","item_value","item_name")
-                        .orderByAsc("sort"));
-        List<SysDictDTO> sysDictDTOS = new ArrayList<>();
-        sysDictList.forEach(v->{
-            SysDictDTO sysDictDTO = new SysDictDTO();
-            BeanUtils.copyProperties(v, sysDictDTO);
-            sysDictDTOS.add(sysDictDTO);
-        });
+    public List<SysDictDTO> findByType(String classCode) {
+        // 1.从redis获取字典
+        List<SysDictDTO> sysDictDTOS = this.redisService.getDictItems(classCode);
+        // 2.没取到则从数据库获取
+        if (sysDictDTOS == null) {
+            List<SysDict> sysDictList = this.baseMapper.selectList(
+                    new QueryWrapper<SysDict>()
+                            .eq("class_code", classCode)
+                            .select("class_code", "item_value", "item_name")
+                            .orderByAsc("sort"));
+            sysDictDTOS = new BaseConverter<SysDict, SysDictDTO>().convert(sysDictList, SysDictDTO.class);
+            // 3.缓存数据
+            this.redisService.addDictItems(classCode, sysDictDTOS);
+        }
         return sysDictDTOS;
     }
 
@@ -62,6 +70,8 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
         // 判断字典项是否存在及完善字典项数据
         handleDictItem(sysDict);
         this.baseMapper.insert(sysDict);
+        // 删除该字典项分类的缓存
+        this.clearDictCache(dictAddDTO.getClassCode());
     }
 
     @Override
@@ -71,13 +81,36 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
         // 判断字典项是否存在及完善字典项数据
         handleDictItem(sysDict);
         this.baseMapper.updateById(sysDict);
+        // 删除该字典项分类的缓存
+        this.clearDictCache(dictUpdateDTO.getClassCode());
+    }
+
+    @Override
+    public void removeDictItem(String id) {
+        String classCode = this.getOne(new QueryWrapper<SysDict>().eq("id",id).select("class_code")).getClassCode();
+        this.removeById(id);
+        this.clearDictCache(classCode);
+    }
+
+    /**
+     * 清除字典项缓存
+     * @param classCode 字典项分类
+     */
+    private void clearDictCache(String classCode){
+        try{
+            // 删除该字典项分类的缓存
+            this.redisService.removeDictItem(classCode);
+        }catch(Exception e){
+            throw BusinessException.fail("清除缓存失败！");
+        }
     }
 
     /**
      * 判断字典项是否存在及完善字典项数据
+     *
      * @param sysDict 字典项
      */
-    private void handleDictItem(SysDict sysDict){
+    private void handleDictItem(SysDict sysDict) {
         // 判断字典项是否存在
         this.exists(sysDict);
         // 获取名称的拼音首字母
@@ -94,11 +127,12 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
 
     /**
      * 判断字典项是否存在
+     *
      * @param sysDict 字典
      */
-    private void exists(SysDict sysDict){
+    private void exists(SysDict sysDict) {
         DictExistsQueryDTO dictExistsQueryDTO = new DictExistsQueryDTO();
-        BeanUtils.copyProperties(sysDict,dictExistsQueryDTO);
+        BeanUtils.copyProperties(sysDict, dictExistsQueryDTO);
         boolean bExists = existsDict(dictExistsQueryDTO);
         if (bExists) {
             throw BusinessException.fail("该字典项已存在！");
@@ -113,9 +147,9 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
         if (StrUtil.isBlank(findClassVO.getSearchText())) {
             sysDictClassList = this.baseMapper.findAllDictClasses();
             dictClassVOList = initTree(sysDictClassList);
-        }else{
+        } else {
             sysDictClassList = this.baseMapper.findDictClassList(findClassVO);
-            dictClassVOList = new BaseConverter<SysDictClass,DictClassVO>().convert(sysDictClassList,DictClassVO.class);
+            dictClassVOList = new BaseConverter<SysDictClass, DictClassVO>().convert(sysDictClassList, DictClassVO.class);
             findChildren(dictClassVOList, sysDictClassList);
             // 去除数据
             dictClassVOList = removeDuplicate(dictClassVOList);
@@ -125,10 +159,11 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
 
     /**
      * 根据字典分类列表生成字典分类树
+     *
      * @param dictClassList 字典分类列表
      * @return 字典分类树
      */
-    private List<DictClassVO> initTree(List<SysDictClass> dictClassList){
+    private List<DictClassVO> initTree(List<SysDictClass> dictClassList) {
         List<DictClassVO> list = new ArrayList<>();
         if (dictClassList != null) {
             // 循环字典分类列表
@@ -136,7 +171,7 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
                 // 保存顶级分类
                 if (SysConstants.TOP_COMMON_CODE.equals(sysDictClass.getParentId())) {
                     DictClassVO dictClassVO = new DictClassVO();
-                    BeanUtils.copyProperties(sysDictClass,dictClassVO);
+                    BeanUtils.copyProperties(sysDictClass, dictClassVO);
                     list.add(dictClassVO);
                 }
             }
@@ -148,7 +183,8 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
 
     /**
      * 根据上级字典分类和字典分类列表生成字典分类树
-     * @param dictClassVOS 上级字典分类list
+     *
+     * @param dictClassVOS  上级字典分类list
      * @param dictClassList 字典分类列表
      */
     private void findChildren(List<DictClassVO> dictClassVOS, List<SysDictClass> dictClassList) {
@@ -160,7 +196,7 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
                 // 将分类列表中的父id是上级分类的id的分类存入子分类列表
                 if (dictClassVO.getId().equals(sysDictClass.getParentId())) {
                     DictClassVO tempVO = new DictClassVO();
-                    BeanUtils.copyProperties(sysDictClass,tempVO);
+                    BeanUtils.copyProperties(sysDictClass, tempVO);
                     tempVO.setParentName(dictClassVO.getName());
                     children.add(tempVO);
                 }
@@ -170,22 +206,22 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
         }
     }
 
-    private List<DictClassVO> removeDuplicate(List<DictClassVO> dictClassVOList){
+    private List<DictClassVO> removeDuplicate(List<DictClassVO> dictClassVOList) {
         List<DictClassVO> list = new ArrayList<>();
         // 循环
         for (DictClassVO dictClass : dictClassVOList) {
             boolean isExists = false;
             // 判断是否存在于其他字典分类的子集中
             for (DictClassVO other : dictClassVOList) {
-                if(!dictClass.getId().equals(other.getId())){
-                    if(isExistsInList(dictClass,other.getChildren())){
+                if (!dictClass.getId().equals(other.getId())) {
+                    if (isExistsInList(dictClass, other.getChildren())) {
                         isExists = true;
                         break;
                     }
                 }
             }
             // 若不存在与其他分类的子集中则保留
-            if(!isExists){
+            if (!isExists) {
                 list.add(dictClass);
             }
         }
@@ -194,7 +230,8 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
 
     /**
      * 是否存在于列表
-     * @param dictClassVO 实体
+     *
+     * @param dictClassVO   实体
      * @param dictClassList 实体list
      * @return 是否
      */
@@ -217,7 +254,7 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
     @Override
     public void addDictClass(DictClassAddVO dictClassAddVO) {
         SysDictClass sysDictClass = new SysDictClass();
-        BeanUtils.copyProperties(dictClassAddVO,sysDictClass);
+        BeanUtils.copyProperties(dictClassAddVO, sysDictClass);
         // 生成主键待修改
         sysDictClass.setId(UUID.randomUUID().toString());
         // 处理字典项分类
@@ -228,7 +265,7 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
     @Override
     public void updateDictClass(DictClassUpdateVO dictClassUpdateVO) {
         SysDictClass sysDictClass = new SysDictClass();
-        BeanUtils.copyProperties(dictClassUpdateVO,sysDictClass);
+        BeanUtils.copyProperties(dictClassUpdateVO, sysDictClass);
         // 处理字典项分类
         handleDictClass(sysDictClass);
         this.baseMapper.updateDictClass(sysDictClass);
@@ -236,9 +273,10 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
 
     /**
      * 判断字典项分类是否存在及完善字典项分类
+     *
      * @param sysDictClass 字典项分类
      */
-    private void handleDictClass(SysDictClass sysDictClass){
+    private void handleDictClass(SysDictClass sysDictClass) {
         this.existsClass(sysDictClass);
         // 获取名称的拼音首字母
         sysDictClass.setSimpleSpelling(ChinesePinyinUtil.getPinYinHeadChar(sysDictClass.getName()));
@@ -254,11 +292,12 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
 
     /**
      * 判断字典分类是否存在
+     *
      * @param sysDictClass 字典分类
      */
-    private void existsClass(SysDictClass sysDictClass){
+    private void existsClass(SysDictClass sysDictClass) {
         DictClassExistsQueryDTO queryDTO = new DictClassExistsQueryDTO();
-        BeanUtils.copyProperties(sysDictClass,queryDTO);
+        BeanUtils.copyProperties(sysDictClass, queryDTO);
         boolean bExists = existsDictClass(queryDTO);
         if (bExists) {
             throw BusinessException.fail("该字典分类已存在！");

@@ -13,7 +13,7 @@ import javax.annotation.Resource;
  * @date 2020-03-20 9:04
  */
 @RestController
-@RequestMapping("EMPIDemo")
+@RequestMapping("/EMPIDemo")
 @Api(tags = {"EMPI测试"})
 public class EMPIDemoController {
 

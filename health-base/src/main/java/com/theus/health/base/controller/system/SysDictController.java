@@ -73,12 +73,12 @@ public class SysDictController {
 		return ResponseResult.e(ResponseCode.OK);
 	}
 
-	@PostMapping("/remove")
-	@ApiOperation("批量删除")
-	@SysLogs("批量删除")
+	@PostMapping("/remove/{id}")
+	@ApiOperation("删除字典项")
+	@SysLogs("删除字典项")
 	@ApiImplicitParam(paramType = "header", name = "Authorization", value = "身份认证Token")
-	public ResponseResult removeList(@RequestBody @ApiParam("ID集合") List<String> idList) {
-		sysDictService.removeByIds(idList);
+	public ResponseResult remove(@PathVariable("id") @ApiParam("字典项ID") String id) {
+		sysDictService.removeDictItem(id);
 		return ResponseResult.e(ResponseCode.OK);
 	}
 

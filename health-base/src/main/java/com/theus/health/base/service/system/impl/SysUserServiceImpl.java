@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.theus.health.base.common.constants.RedisKeyPrefix;
 import com.theus.health.base.common.constants.SysConstants;
 import com.theus.health.base.config.jwt.JwtToken;
 import com.theus.health.base.mapper.system.SysUserMapper;
@@ -16,7 +15,6 @@ import com.theus.health.base.model.vo.SysUserVO;
 import com.theus.health.base.service.global.ShiroService;
 import com.theus.health.base.service.system.*;
 import com.theus.health.base.util.LoginUtil;
-import com.theus.health.base.util.RedisUtil;
 import com.theus.health.base.util.ShiroUtils;
 import com.theus.health.core.bean.ResponseCode;
 import com.theus.health.core.exception.BusinessException;
@@ -52,8 +50,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     @Resource
     private ShiroService shiroService;
     @Resource
-    private RedisUtil redisUtil;
-    @Resource
     private SysOrganService organService;
     @Resource
     private RedisService redisService;
@@ -82,21 +78,12 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
      */
     @Override
     public SysUser getCacheUser(String name) {
-        SysUser sysUser = null;
-        String userKey = RedisKeyPrefix.USER + name;
-        try {
-            // 获取redis中缓存的用户
-            if (redisUtil.existKey(userKey)) {
-                sysUser = (SysUser) redisUtil.getObject(userKey);
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        SysUser sysUser = this.redisService.getUser(name);
         // 未获取到用户 则从数据库中获取
         if (sysUser == null) {
             sysUser = this.baseMapper.getUser(name);
             // 缓存用户信息
-            redisUtil.add(userKey, sysUser);
+            this.redisService.addUser(name, sysUser);
         }
         return sysUser;
     }
