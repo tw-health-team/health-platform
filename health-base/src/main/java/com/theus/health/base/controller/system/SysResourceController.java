@@ -5,6 +5,7 @@ import com.theus.health.base.common.constants.ResourceConstants;
 import com.theus.health.base.common.constants.SysConstants;
 import com.theus.health.base.model.dto.system.resource.FindResourceDTO;
 import com.theus.health.base.model.dto.system.resource.ResourceDTO;
+import com.theus.health.base.model.po.system.SysResource;
 import com.theus.health.base.service.system.SysResourceService;
 import com.theus.health.core.bean.ResponseCode;
 import com.theus.health.core.bean.ResponseResult;
@@ -16,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author tangwei
@@ -33,7 +35,7 @@ public class SysResourceController {
     @ApiOperation(value = "获取所有的资源列表")
     @SysLogs("获取所有的资源列表")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-    public ResponseResult list(){
+    public ResponseResult<List<SysResource>> list(){
         return ResponseResult.e(ResponseCode.OK,resourceService.treeList());
     }
 
@@ -41,7 +43,7 @@ public class SysResourceController {
     @ApiOperation(value = "添加资源")
     @SysLogs("添加资源")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-    public ResponseResult add(@RequestBody @Validated @ApiParam("资源数据") ResourceDTO dto){
+    public ResponseResult<String> add(@RequestBody @Validated @ApiParam("资源数据") ResourceDTO dto){
         resourceService.add(dto);
         return ResponseResult.e(ResponseCode.OK);
     }
@@ -50,7 +52,7 @@ public class SysResourceController {
     @ApiOperation(value = "添加资源")
     @SysLogs("添加资源")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-    public ResponseResult update(@PathVariable("id") @ApiParam("资源ID") String id,
+    public ResponseResult<String> update(@PathVariable("id") @ApiParam("资源ID") String id,
                                  @RequestBody @Validated @ApiParam("资源数据") ResourceDTO dto){
         resourceService.update(id,dto);
         return ResponseResult.e(ResponseCode.OK);
@@ -60,7 +62,7 @@ public class SysResourceController {
     @ApiOperation(value = "删除资源")
     @SysLogs("删除资源")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-    public ResponseResult remove(@PathVariable("id") @ApiParam("资源ID") String id){
+    public ResponseResult<String> remove(@PathVariable("id") @ApiParam("资源ID") String id){
         resourceService.remove(id);
         return ResponseResult.e(ResponseCode.OK);
     }
@@ -69,7 +71,7 @@ public class SysResourceController {
     @ApiOperation(value = "获取用户菜单树")
     @SysLogs("获取用户菜单树")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-    public ResponseResult navTree(@PathVariable("username") @ApiParam("用户名") String username) {
+    public ResponseResult<List<SysResource>> navTree(@PathVariable("username") @ApiParam("用户名") String username) {
         return ResponseResult.e(ResponseCode.OK,resourceService.findTree(username, ResourceConstants.ResultType.NO_BUTTON));
     }
 
@@ -77,7 +79,7 @@ public class SysResourceController {
     @ApiOperation(value = "根据查询条件获取资源树")
     @SysLogs("根据查询条件获取资源树")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-    public ResponseResult tree(@RequestBody @Validated @ApiParam("过滤文本") FindResourceDTO findResourceDTO){
+    public ResponseResult<List<SysResource>> tree(@RequestBody @Validated @ApiParam("过滤文本") FindResourceDTO findResourceDTO){
         return ResponseResult.e(ResponseCode.OK,resourceService.treeList(findResourceDTO.getSearchText().trim()));
     }
 }

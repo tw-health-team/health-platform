@@ -25,5 +25,5 @@ public class FindUserDTO extends BaseSplitPageDTO {
     /**
      * 是否显示下级机构用户
      */
-    private int showChild;
+    private Integer showChild;
 }

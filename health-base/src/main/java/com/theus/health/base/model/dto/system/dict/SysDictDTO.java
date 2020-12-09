@@ -14,4 +14,6 @@ public class SysDictDTO {
     private String itemName;
 
     private String itemValue;
+
+    private Integer sort;
 }

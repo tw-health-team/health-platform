@@ -50,10 +50,10 @@ public interface SysOrganService extends IService<SysOrgan> {
 
     /**
      * 查询机构树
-     * @param findDeptDTO 机构查询条件
+     * @param findOrganDTO 机构查询条件
      * @return 机构树
      */
-    List<SysOrgan> findTree(FindOrganDTO findDeptDTO);
+    List<SysOrgan> findTree(FindOrganDTO findOrganDTO);
 
     /**
      * 获取机构及所有下级机构

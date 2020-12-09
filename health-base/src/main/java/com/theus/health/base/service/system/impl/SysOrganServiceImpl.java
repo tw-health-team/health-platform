@@ -29,7 +29,7 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
     /**
      * 未删除标志
      */
-    private final int NOT_DELETED = DictConstants.delFlag.NORMAL.getValue();
+    private final int NOT_DELETED = DictConstants.DelFlag.NORMAL.getValue();
 
     @Override
     public SysOrgan findById(String id) {
@@ -138,27 +138,8 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
 
     @Override
     public List<SysOrgan> getOrganAndAllSubNode(String organId) {
-        List<SysOrgan> sysOrgans = new ArrayList<>();
-        List<SysOrgan> children;
-        SysOrgan sysOrgan = this.findById(organId);
-        children = this.getAllSubNode(organId);
-        sysOrgans.add(sysOrgan);
-        sysOrgans.addAll(children);
-        return sysOrgans;
-    }
-
-    /**
-     * 获取所有下级机构
-     *
-     * @param organId 机构id
-     * @return 所有下级机构list
-     */
-    private List<SysOrgan> getAllSubNode(String organId) {
-        List<SysOrgan> children = this.findChildren(organId);
-        List<SysOrgan> grandChildren = new ArrayList<>();
-        children.forEach(v -> grandChildren.addAll(this.getAllSubNode(v.getId())));
-        children.addAll(grandChildren);
-        return children;
+        List<SysOrgan> allOrgans = this.findAllOrgans();
+        return this.getOrganList(organId,allOrgans);
     }
 
     /**
@@ -268,6 +249,7 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
                 Iterator<SysOrgan> iterator = allOrgans.iterator();
                 while (iterator.hasNext()) {
                     SysOrgan resource = iterator.next();
+                    // TODO 20201010 parentId 是否改为 resource.getId() 待验证
                     // 获取子资源
                     if (!filteredMap.containsKey(parentId) && parentId.equals(resource.getParentId())) {
                         // 存储获取到的子集
@@ -296,15 +278,15 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
         if (allOrgans != null && allOrgans.size() > 0) {
             List<SysOrgan> listNotParent = new ArrayList<>();
             // 第一步：保存所有的id
-            List<String> allID = new ArrayList<>();
+            List<String> allIds = new ArrayList<>();
             for (SysOrgan sysOrgan : allOrgans) {
                 String id = sysOrgan.getId();
-                allID.add(id);
+                allIds.add(id);
             }
             // 第二步：遍历allOrgans找出所有的根节点和非根节点
             for (SysOrgan sysOrgan : allOrgans) {
                 String parentId = sysOrgan.getParentId();
-                if (!allID.contains(parentId)) {
+                if (!allIds.contains(parentId)) {
                     listParent.add(sysOrgan);
                 } else {
                     listNotParent.add(sysOrgan);

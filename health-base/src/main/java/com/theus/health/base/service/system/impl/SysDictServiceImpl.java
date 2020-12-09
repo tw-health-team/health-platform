@@ -22,8 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author tangwei
@@ -48,12 +50,14 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
             List<SysDict> sysDictList = this.baseMapper.selectList(
                     new QueryWrapper<SysDict>()
                             .eq("class_code", classCode)
-                            .select("class_code", "item_value", "item_name")
+                            .select("class_code", "item_value", "item_name","sort")
                             .orderByAsc("sort"));
             sysDictDTOS = new BaseConverter<SysDict, SysDictDTO>().convert(sysDictList, SysDictDTO.class);
             // 3.缓存数据
             this.redisService.addDictItems(classCode, sysDictDTOS);
         }
+        // 按sort升序
+        sysDictDTOS.sort(Comparator.comparingInt(SysDictDTO::getSort));
         return sysDictDTOS;
     }
 
@@ -87,20 +91,21 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
 
     @Override
     public void removeDictItem(String id) {
-        String classCode = this.getOne(new QueryWrapper<SysDict>().eq("id",id).select("class_code")).getClassCode();
+        String classCode = this.getOne(new QueryWrapper<SysDict>().eq("id", id).select("class_code")).getClassCode();
         this.removeById(id);
         this.clearDictCache(classCode);
     }
 
     /**
      * 清除字典项缓存
+     *
      * @param classCode 字典项分类
      */
-    private void clearDictCache(String classCode){
-        try{
+    private void clearDictCache(String classCode) {
+        try {
             // 删除该字典项分类的缓存
             this.redisService.removeDictItem(classCode);
-        }catch(Exception e){
+        } catch (Exception e) {
             throw BusinessException.fail("清除缓存失败！");
         }
     }
@@ -318,5 +323,20 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
             this.baseMapper.delDictClass(sysDictClass.getId());
             this.removeChildClass(sysDictClass.getId());
         }
+    }
+
+    @Override
+    public String getItemName(String classCode, String itemValue) {
+        String itemName = "";
+        if (StrUtil.isNotBlank(classCode) && StrUtil.isNotBlank(itemValue)) {
+            List<SysDictDTO> sysDictDTOList = this.findByType(classCode);
+            if (sysDictDTOList != null) {
+                sysDictDTOList = sysDictDTOList.stream().filter((v -> v.getItemValue().equals(itemValue))).collect(Collectors.toList());
+                if (sysDictDTOList.size() > 0) {
+                    itemName = sysDictDTOList.get(0).getItemName();
+                }
+            }
+        }
+        return itemName;
     }
 }

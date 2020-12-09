@@ -1,5 +1,6 @@
 package com.theus.health.base.service.system.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.theus.health.base.common.constants.RedisKeyPrefix;
 import com.theus.health.base.model.dto.system.dict.SysDictDTO;
 import com.theus.health.base.model.po.system.SysUser;
@@ -8,8 +9,10 @@ import com.theus.health.base.util.RedisUtil;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 业务数据缓存处理
@@ -83,4 +86,6 @@ public class RedisServiceImpl implements RedisService {
         }
         return dictList;
     }
+
+
 }

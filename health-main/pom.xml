@@ -30,6 +30,10 @@
             <groupId>com.theus</groupId>
             <artifactId>health-empi</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.theus</groupId>
+            <artifactId>health-record</artifactId>
+        </dependency>
     </dependencies>
 
     <!-- 动态选择配置文件 -->

@@ -53,4 +53,5 @@ public interface RedisService {
      * @return 字典项list
      */
     List<SysDictDTO> getDictItems(String classCode);
+
 }

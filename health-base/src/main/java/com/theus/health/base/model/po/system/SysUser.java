@@ -26,6 +26,7 @@ public class SysUser extends BaseModel implements Serializable  {
     @TableId
     private String id;
     private String name;
+    private String realName;
     private Integer age;
     private String password;
     private String email;

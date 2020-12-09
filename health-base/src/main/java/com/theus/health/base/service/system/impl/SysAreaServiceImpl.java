@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.*;
 
-import static com.theus.health.base.common.constants.DictConstants.areaLevel.*;
+import static com.theus.health.base.common.constants.DictConstants.AreaLevel.*;
 
 /**
  * @author libin
@@ -45,8 +45,8 @@ public class SysAreaServiceImpl extends ServiceImpl<SysAreaMapper, SysArea> impl
             put(2, PROVINCE.getValue());
             put(4, CITY.getValue());
             put(6, DISTRICT.getValue());
-            put(9, DictConstants.areaLevel.TOWN.getValue());
-            put(12, DictConstants.areaLevel.COMMITTEE.getValue());
+            put(9, DictConstants.AreaLevel.TOWN.getValue());
+            put(12, DictConstants.AreaLevel.COMMITTEE.getValue());
         }
     };
 
@@ -304,7 +304,7 @@ public class SysAreaServiceImpl extends ServiceImpl<SysAreaMapper, SysArea> impl
                     sysArea.setDistrict(parent.getDistrict());
                     sysArea.setDistrictShortName(parent.getDistrictShortName());
                     sysArea.setDistrictSpelling(parent.getDistrictSpelling());
-                    if (levelCode.equals(DictConstants.areaLevel.TOWN.getValue())) {
+                    if (levelCode.equals(DictConstants.AreaLevel.TOWN.getValue())) {
                         sysArea.setTown(sysArea.getName());
                         sysArea.setTownShortName(sysArea.getShortName());
                         sysArea.setTownSpelling(sysArea.getFullSpelling());
@@ -313,7 +313,7 @@ public class SysAreaServiceImpl extends ServiceImpl<SysAreaMapper, SysArea> impl
                         sysArea.setTown(parent.getTown());
                         sysArea.setTownShortName(parent.getTownShortName());
                         sysArea.setTownSpelling(parent.getTownSpelling());
-                        if (levelCode.equals(DictConstants.areaLevel.COMMITTEE.getValue())) {
+                        if (levelCode.equals(DictConstants.AreaLevel.COMMITTEE.getValue())) {
                             sysArea.setCommittee(sysArea.getName());
                             sysArea.setCommitteeShortName(sysArea.getShortName());
                             sysArea.setCommitteeSpelling(sysArea.getFullSpelling());
@@ -389,12 +389,12 @@ public class SysAreaServiceImpl extends ServiceImpl<SysAreaMapper, SysArea> impl
                 parentName = sysArea.getCity();
                 parentEntireName.append(sysArea.getProvince()).append(splitChar)
                         .append(sysArea.getCity());
-            } else if (levelCode.equals(DictConstants.areaLevel.TOWN.getValue())) {
+            } else if (levelCode.equals(DictConstants.AreaLevel.TOWN.getValue())) {
                 parentName = sysArea.getDistrict();
                 parentEntireName.append(sysArea.getProvince()).append(splitChar)
                         .append(sysArea.getCity()).append(splitChar)
                         .append(sysArea.getDistrict());
-            } else if (levelCode.equals(DictConstants.areaLevel.COMMITTEE.getValue())) {
+            } else if (levelCode.equals(DictConstants.AreaLevel.COMMITTEE.getValue())) {
                 parentName = sysArea.getTown();
                 parentEntireName.append(sysArea.getProvince()).append(splitChar)
                         .append(sysArea.getCity()).append(splitChar)

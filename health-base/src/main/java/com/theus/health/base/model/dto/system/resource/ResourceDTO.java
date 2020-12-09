@@ -33,6 +33,10 @@ public class ResourceDTO {
     @NotNull(message = "资源排序不能为空")
     private Integer sort;
 
-    private Boolean verification = true;
+    private Boolean verification;
 
+    /**
+     * 是否生成默认按钮(0否 1是）
+     */
+    private String autoCreateButton;
 }

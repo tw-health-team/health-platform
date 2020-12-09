@@ -7,13 +7,14 @@ package com.theus.health.base.common.constants;
  * @date 2020-02-27 21:49
  */
 public class DictConstants {
+
     /**
      * 行政区划级别（机构级别）
      *
      * @author tangwei
      * @date 2020-02-27
      */
-    public enum areaLevel {
+    public enum AreaLevel {
 
         /**
          * 省（自治区、直辖市）级
@@ -36,7 +37,7 @@ public class DictConstants {
          */
         COMMITTEE("5", "居委(村)级");
 
-        areaLevel(String value, String name) {
+        AreaLevel(String value, String name) {
             this.value = value;
             this.name = name;
         }
@@ -56,7 +57,7 @@ public class DictConstants {
     /**
      * 数据删除标志
      */
-    public enum delFlag {
+    public enum DelFlag {
         /**
          * 正常
          */
@@ -66,7 +67,7 @@ public class DictConstants {
          */
         DELETED(1, "删除");
 
-        delFlag(Integer value, String name) {
+        DelFlag(Integer value, String name) {
             this.value = value;
             this.name = name;
         }
@@ -75,6 +76,36 @@ public class DictConstants {
         private final String name;
 
         public Integer getValue() {
+            return value;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
+    /**
+     * 是否标志
+     */
+    public enum YeaOrNot {
+        /**
+         * 否
+         */
+        NO("0", "否"),
+        /**
+         * 是
+         */
+        YES("1", "是");
+
+        YeaOrNot(String value, String name) {
+            this.value = value;
+            this.name = name;
+        }
+
+        private final String value;
+        private final String name;
+
+        public String getValue() {
             return value;
         }
 

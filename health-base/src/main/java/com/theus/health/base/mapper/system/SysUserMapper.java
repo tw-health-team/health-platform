@@ -21,6 +21,7 @@ public interface SysUserMapper extends BaseMapper<SysUser> {
 
     /**
      * 查询用户列表
+     * @param page 分页
      * @param findUserDTO 查询条件
      * @return 用户list
      */

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.theus.health.record.mapper.PersonalInfoMapper">
+
+    <select id="findPage" resultType="com.theus.health.record.model.po.EhrPersonalInfo">
+        select a.*
+        from ehr_personal_info a
+        WHERE a.del_flag=0
+        <if test="query.name!=null and query.name!='' ">
+            and a.name like '%'+#{query.name}+'%'
+        </if>
+    </select>
+</mapper>

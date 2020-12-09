@@ -30,7 +30,7 @@ public class SysDict {
 
     private String classCode;
 
-    private Long sort;
+    private Integer sort;
 
     private String remarks;
 

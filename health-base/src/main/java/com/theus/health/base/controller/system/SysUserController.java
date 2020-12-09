@@ -1,10 +1,9 @@
 package com.theus.health.base.controller.system;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.theus.health.base.common.annotation.SysLogs;
-import com.theus.health.base.model.dto.system.user.FindUserDTO;
-import com.theus.health.base.model.dto.system.user.ResetPasswordDTO;
-import com.theus.health.base.model.dto.system.user.UserAddDTO;
-import com.theus.health.base.model.dto.system.user.UserUpdateDTO;
+import com.theus.health.base.model.dto.system.user.*;
+import com.theus.health.base.model.po.system.SysUser;
 import com.theus.health.base.service.system.SysUserService;
 import com.theus.health.core.bean.ResponseCode;
 import com.theus.health.core.bean.ResponseResult;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author tangwei
@@ -33,7 +33,7 @@ public class SysUserController {
     @ApiOperation(value = "分页获取用户数据")
     @SysLogs("分页获取用户数据")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-    public ResponseResult get(@RequestBody @Validated @ApiParam(value = "用户获取过滤条件") FindUserDTO findUserDTO){
+    public ResponseResult<IPage<SysUser>> get(@RequestBody @Validated @ApiParam(value = "用户获取过滤条件") FindUserDTO findUserDTO){
         return ResponseResult.e(ResponseCode.OK,sysUserService.findPage(findUserDTO));
     }
 
@@ -41,7 +41,7 @@ public class SysUserController {
     @ApiOperation(value = "根据ID获取用户信息")
     @SysLogs("根据ID获取用户信息")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-    public ResponseResult getUser(@PathVariable("id") @ApiParam(value = "用户ID") String id) {
+    public ResponseResult<SysUser> getUser(@PathVariable("id") @ApiParam(value = "用户ID") String id) {
         return ResponseResult.e(ResponseCode.OK,sysUserService.findUserById(id,true));
     }
 
@@ -49,7 +49,7 @@ public class SysUserController {
     @ApiOperation(value = "锁定用户")
     @SysLogs("锁定用户")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-    public ResponseResult lock(@PathVariable("id") @ApiParam(value = "用户标识ID") String id){
+    public ResponseResult<String> lock(@PathVariable("id") @ApiParam(value = "用户标识ID") String id){
         sysUserService.statusChange(id, 0);
         return ResponseResult.e(ResponseCode.OK);
     }
@@ -58,7 +58,7 @@ public class SysUserController {
     @ApiOperation(value = "解锁用户")
     @SysLogs("解锁用户")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-    public ResponseResult unlock(@PathVariable("id") @ApiParam(value = "用户标识ID") String id){
+    public ResponseResult<String> unlock(@PathVariable("id") @ApiParam(value = "用户标识ID") String id){
         sysUserService.statusChange(id, 1);
         return ResponseResult.e(ResponseCode.OK);
     }
@@ -67,7 +67,7 @@ public class SysUserController {
     @ApiOperation(value = "删除用户")
     @SysLogs("删除用户")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-    public ResponseResult remove(@PathVariable("id") @ApiParam(value = "用户标识ID") String id){
+    public ResponseResult<String> remove(@PathVariable("id") @ApiParam(value = "用户标识ID") String id){
         sysUserService.removeUser(id);
         return ResponseResult.e(ResponseCode.OK);
     }
@@ -76,7 +76,7 @@ public class SysUserController {
     @ApiOperation(value = "添加用户")
     @SysLogs("添加用户")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-    public ResponseResult add(@RequestBody @Validated @ApiParam(value = "用户数据") UserAddDTO addDTO){
+    public ResponseResult<String> add(@RequestBody @Validated @ApiParam(value = "用户数据") UserAddDTO addDTO){
         sysUserService.add(addDTO);
         return ResponseResult.e(ResponseCode.OK);
     }
@@ -85,7 +85,7 @@ public class SysUserController {
     @ApiOperation(value = "更新用户")
     @SysLogs("更新用户")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-    public ResponseResult update(@PathVariable("id") @ApiParam(value = "用户标识ID") String id,
+    public ResponseResult<String> update(@PathVariable("id") @ApiParam(value = "用户标识ID") String id,
                                  @RequestBody @Validated @ApiParam(value = "用户数据") UserUpdateDTO updateDTO){
         sysUserService.update(id,updateDTO);
         return ResponseResult.e(ResponseCode.OK);
@@ -95,7 +95,7 @@ public class SysUserController {
     @ApiOperation(value = "更新用户")
     @SysLogs("更新用户")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-    public ResponseResult updateNew(@RequestBody @Validated @ApiParam(value = "用户数据") UserUpdateDTO updateDTO){
+    public ResponseResult<String> updateNew(@RequestBody @Validated @ApiParam(value = "用户数据") UserUpdateDTO updateDTO){
         sysUserService.update(updateDTO.getId(),updateDTO);
         return ResponseResult.e(ResponseCode.OK);
     }
@@ -104,7 +104,7 @@ public class SysUserController {
     @ApiOperation(value = "重置密码")
     @SysLogs("重置密码")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-    public ResponseResult resetPassword(@RequestBody
+    public ResponseResult<String> resetPassword(@RequestBody
                                         @Validated @ApiParam(value = "用户及密码数据") ResetPasswordDTO dto){
         sysUserService.resetPassword(dto);
         return ResponseResult.e(ResponseCode.OK);
@@ -114,15 +114,15 @@ public class SysUserController {
     @ApiOperation(value = "获取用户操作权限")
     @SysLogs("获取用户操作权限")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-    public ResponseResult permissions(@PathVariable("username") @ApiParam("用户名") String username) {
+    public ResponseResult<Set<String>> permissions(@PathVariable("username") @ApiParam("用户名") String username) {
         return ResponseResult.e(ResponseCode.OK,sysUserService.findPermissions(username));
     }
 
     @GetMapping(value="/userInfo/{username}")
-    @ApiOperation(value = "获取用户操作权限")
-    @SysLogs("获取用户操作权限")
+    @ApiOperation(value = "获取用户信息")
+    @SysLogs("获取用户信息")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-    public ResponseResult getUserByName(@PathVariable("username") @ApiParam("用户名") String username) {
+    public ResponseResult<UserDTO> getUserByName(@PathVariable("username") @ApiParam("用户名") String username) {
         return ResponseResult.e(ResponseCode.OK,sysUserService.getUserInfo(username));
     }
 }

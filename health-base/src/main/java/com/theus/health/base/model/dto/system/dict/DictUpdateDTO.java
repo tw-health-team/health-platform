@@ -23,7 +23,7 @@ public class DictUpdateDTO {
     @NotBlank(message = "字典分类代码不能为空")
     private String classCode;
 
-    private Long sort;
+    private Integer sort;
 
     private String remarks;
 }

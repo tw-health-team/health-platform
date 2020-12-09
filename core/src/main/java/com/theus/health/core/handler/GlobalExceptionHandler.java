@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     @ResponseBody
-    ResponseResult requestExceptionHandler(Exception e) {
+    ResponseResult<Object> requestExceptionHandler(Exception e) {
         LOGGER.error(e.getMessage(), e);
         String msg;
         if (e.getCause() != null) {
@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BusinessException.class)
     @ResponseBody
-    ResponseResult businessExceptionHandler(BusinessException e) {
+    ResponseResult<Object> businessExceptionHandler(BusinessException e) {
         LOGGER.error(e.getMessage(), e);
         if (e.getE() != null) {
             e.printStackTrace();
@@ -72,7 +72,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseBody
-    ResponseResult methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException e) {
+    ResponseResult<Object> methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException e) {
         LOGGER.error(e.getMessage(), e);
         BindingResult result = e.getBindingResult();
         String s = "参数验证失败";
@@ -92,7 +92,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BindException.class)
     @ResponseBody
-    ResponseResult validExceptionHandler(BindException e) {
+    ResponseResult<Object> validExceptionHandler(BindException e) {
         LOGGER.error(e.getMessage(), e);
         String msg = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
         return ResponseResult.builder().status(ResponseCode.FAIL.code).msg(msg).build();
@@ -105,7 +105,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = DataIntegrityViolationException.class)
     @ResponseBody
-    public ResponseResult requestExceptionHandler(DataIntegrityViolationException e) {
+    public ResponseResult<Object> requestExceptionHandler(DataIntegrityViolationException e) {
         LOGGER.error(e.getMessage(), e);
         String msg = "数据操作格式异常：";
         if (e.getCause() != null) {

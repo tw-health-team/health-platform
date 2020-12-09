@@ -89,4 +89,13 @@ public interface SysDictService extends IService<SysDict> {
      * @param id 主键
      */
     void removeClass(String id);
+
+
+    /**
+     * 获取字典项名称
+     * @param classCode 字典分类代码
+     * @param itemValue 字典项值
+     * @return 字典项名称
+     */
+    String getItemName(String classCode, String itemValue);
 }

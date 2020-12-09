@@ -58,6 +58,10 @@ public interface SysConstants {
      * 行政区划常量
      */
     class Area {
+        /**
+         * 直辖市
+         */
+        public static String[] provLevelMunicipality = new String[]{"北京市", "天津市", "上海市", "重庆市"};
 
         /**
          * 区划顶级名称

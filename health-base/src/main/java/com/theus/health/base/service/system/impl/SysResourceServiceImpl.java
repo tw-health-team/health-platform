@@ -3,6 +3,7 @@ package com.theus.health.base.service.system.impl;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.theus.health.base.common.constants.DictConstants;
 import com.theus.health.base.common.constants.ResourceConstants;
 import com.theus.health.base.common.constants.SysConstants;
 import com.theus.health.base.mapper.system.SysResourceMapper;
@@ -48,9 +49,14 @@ public class SysResourceServiceImpl extends ServiceImpl<SysResourceMapper, SysRe
         SysResource resource = new SysResource();
         BeanUtils.copyProperties(dto, resource);
         resource.setCreateDate(new Date());
+        resource.setVerification(Boolean.TRUE);
         // 获取拼音首字母
         resource.setSimpleSpelling(ChinesePinyinUtil.getPinYinHeadChar(dto.getName()));
         this.save(resource);
+        if (dto.getAutoCreateButton().equals(DictConstants.YeaOrNot.YES.getValue())) {
+            // 生成默认按钮 并保存
+            this.createMenuButtons(resource);
+        }
         shiroService.reloadPerms();
     }
 
@@ -373,5 +379,33 @@ public class SysResourceServiceImpl extends ServiceImpl<SysResourceMapper, SysRe
         // 递归获取所有子节点
         this.createTree(parentList, notParentList);
         return parentList;
+    }
+
+    /**
+     * 生成菜单的默认按钮
+     *
+     * @param sysResource 菜单
+     */
+    private void createMenuButtons(SysResource sysResource) {
+        if (sysResource.getType() == ResourceConstants.Type.MENU.ordinal()) {
+            List<SysResource> resourceList = new ArrayList<>();
+            String permission = sysResource.getPermission();
+            String url = sysResource.getUrl();
+            // 生成按钮
+            for (ResourceConstants.ButtonType buttonType : ResourceConstants.ButtonType.values()) {
+                String value = buttonType.getName();
+                String text = buttonType.getText();
+                SysResource resource = new SysResource();
+                resource.setName(text);
+                resource.setParentId(sysResource.getId());
+                resource.setType((short) ResourceConstants.Type.BUTTON.ordinal());
+                resource.setSimpleSpelling(ChinesePinyinUtil.getPinYinHeadChar(resource.getName()));
+                resource.setPermission(permission + ResourceConstants.SPLIT_CHAR_PER + value);
+                resource.setCreateDate(new Date());
+                resource.setVerification(Boolean.TRUE);
+                resourceList.add(resource);
+            }
+            this.saveBatch(resourceList);
+        }
     }
 }

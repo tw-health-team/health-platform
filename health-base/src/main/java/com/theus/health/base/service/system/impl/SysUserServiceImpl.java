@@ -190,18 +190,18 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         wrapper.orderByDesc(true, "create_time");
         IPage<SysUser> userPage = this.page(new Page<>(findUserDTO.getPageNum(),
                 findUserDTO.getPageSize()), wrapper);
-        IPage<SysUserVO> userVOPage = new Page<>();
-        BeanUtils.copyProperties(userPage, userVOPage);
-        List<SysUserVO> userVOS = new ArrayList<>();
+        IPage<SysUserVO> uservopage = new Page<>();
+        BeanUtils.copyProperties(userPage, uservopage);
+        List<SysUserVO> uservos = new ArrayList<>();
         userPage.getRecords().forEach(v -> {
             SysUserVO vo = new SysUserVO();
             BeanUtils.copyProperties(v, vo);
             //查找匹配所有用户的角色
             vo.setRoles(roleService.findAllRoleByUserId(v.getId(), false));
-            userVOS.add(vo);
+            uservos.add(vo);
         });
-        userVOPage.setRecords(userVOS);
-        return userVOPage;
+        uservopage.setRecords(uservos);
+        return uservopage;
     }
 
     @Override

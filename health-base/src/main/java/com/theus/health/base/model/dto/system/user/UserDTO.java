@@ -11,6 +11,7 @@ public class UserDTO {
     private String id;
     private String name;
     private String email;
+    private String realName;
     private String mobile;
     private String organId;
     private String organName;
