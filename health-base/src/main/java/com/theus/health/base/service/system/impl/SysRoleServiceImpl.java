@@ -178,6 +178,10 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
             String roleId = records.get(0).getRoleId();
             roleResourceService.remove(new QueryWrapper<SysRoleResource>().eq("role_id", roleId));
             roleResourceService.saveBatch(records);
+            // 更新角色对应的所有用户的权限信息
+            SysRole role = new SysRole();
+            role.setId(roleId);
+            this.updateCache(role, true, false);
         }
     }
 }

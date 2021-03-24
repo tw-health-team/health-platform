@@ -2,6 +2,7 @@ package com.theus.health.base.controller.system;
 
 import com.theus.health.base.common.annotation.SysLogs;
 import com.theus.health.base.common.controller.CrudController;
+import com.theus.health.base.model.po.system.SysResource;
 import com.theus.health.base.model.po.system.SysRole;
 import com.theus.health.base.model.dto.system.role.FindRoleDTO;
 import com.theus.health.base.model.dto.system.role.RoleAddDTO;
@@ -44,7 +45,7 @@ public class SysRoleController implements CrudController<SysRole, RoleAddDTO, Ro
     @ApiOperation(value = "查询所有角色")
     @SysLogs("查询所有角色")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-    public ResponseResult findAll() {
+    public ResponseResult<List<SysRole>> findAll() {
         return ResponseResult.e(ResponseCode.OK,getService().list());
     }
 
@@ -52,7 +53,7 @@ public class SysRoleController implements CrudController<SysRole, RoleAddDTO, Ro
     @ApiOperation(value = "查询角色资源")
     @SysLogs("查询角色资源")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-    public ResponseResult roleResource(@PathVariable("roleId") @ApiParam("角色ID") String roleId) {
+    public ResponseResult<List<SysResource>> roleResource(@PathVariable("roleId") @ApiParam("角色ID") String roleId) {
         return ResponseResult.e(ResponseCode.OK,getService().findRoleResource(roleId));
     }
 
@@ -60,7 +61,7 @@ public class SysRoleController implements CrudController<SysRole, RoleAddDTO, Ro
     @ApiOperation(value = "保存角色资源")
     @SysLogs("保存角色资源")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-    public ResponseResult saveRoleResource(@RequestBody List<SysRoleResource> records) {
+    public ResponseResult<String> saveRoleResource(@RequestBody List<SysRoleResource> records) {
         getService().saveRoleResource(records);
         return ResponseResult.e(ResponseCode.OK);
     }

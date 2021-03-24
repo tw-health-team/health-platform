@@ -1,5 +1,6 @@
 package com.theus.health.base.config.shiro;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.theus.health.base.config.jwt.JwtToken;
 import com.theus.health.base.model.po.system.SysUser;
@@ -59,7 +60,7 @@ public class MyRealm extends AuthorizingRealm {
                         info.addRole(role.getName());
                         if (role.getResources() != null) {
                             role.getResources().forEach(v -> {
-                                if (!"".equals(v.getPermission().trim())) {
+                                if (StrUtil.isNotBlank(v.getPermission())) {
                                     info.addStringPermission(v.getPermission());
                                 }
                             });

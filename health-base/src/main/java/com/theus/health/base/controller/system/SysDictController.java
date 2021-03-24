@@ -2,8 +2,10 @@ package com.theus.health.base.controller.system;
 
 import com.theus.health.base.common.annotation.SysLogs;
 import com.theus.health.base.model.dto.system.dict.*;
+import com.theus.health.base.model.po.system.SysDict;
 import com.theus.health.base.model.vo.dict.DictClassAddVO;
 import com.theus.health.base.model.vo.dict.DictClassUpdateVO;
+import com.theus.health.base.model.vo.dict.DictClassVO;
 import com.theus.health.base.model.vo.dict.FindClassVO;
 import com.theus.health.base.service.system.SysDictService;
 import com.theus.health.core.bean.ResponseCode;
@@ -35,7 +37,7 @@ public class SysDictController {
 	@ApiOperation(value = "获取字典分类树")
 	@SysLogs("获取字典分类树")
 	@ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-	public ResponseResult findDictClassTree(){
+	public ResponseResult<List<DictClassVO>> findDictClassTree(){
 		return ResponseResult.e(ResponseCode.OK,sysDictService.findDictClassTree());
 	}
 
@@ -43,7 +45,7 @@ public class SysDictController {
 	@ApiOperation(value = "根据字典分类代码获取字典项信息")
 	@SysLogs("根据字典分类代码获取字典项信息")
 	@ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-	public ResponseResult findByType(@PathVariable("classCode") @ApiParam("字典分类代码") String classCode) {
+	public ResponseResult<List<SysDictDTO>> findByType(@PathVariable("classCode") @ApiParam("字典分类代码") String classCode) {
 		return ResponseResult.e(ResponseCode.OK,sysDictService.findByType(classCode));
 	}
 
@@ -51,7 +53,7 @@ public class SysDictController {
 	@ApiOperation(value = "获取字典数据")
 	@SysLogs("获取字典数据")
 	@ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-	public ResponseResult list(@RequestBody @Validated @ApiParam(value = "字典获取过滤条件") FindDictDTO findDictDTO){
+	public ResponseResult<List<SysDict>> list(@RequestBody @Validated @ApiParam(value = "字典获取过滤条件") FindDictDTO findDictDTO){
 		return ResponseResult.e(ResponseCode.OK,sysDictService.findList(findDictDTO));
 	}
 
@@ -59,7 +61,7 @@ public class SysDictController {
 	@ApiOperation(value = "添加字典")
 	@SysLogs("添加字典")
 	@ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-	public ResponseResult add(@RequestBody @Validated @ApiParam(value = "字典新增数据") DictAddDTO dictAddDTO){
+	public ResponseResult<String> add(@RequestBody @Validated @ApiParam(value = "字典新增数据") DictAddDTO dictAddDTO){
 		sysDictService.addDictItem(dictAddDTO);
 		return ResponseResult.e(ResponseCode.OK);
 	}
@@ -68,7 +70,7 @@ public class SysDictController {
 	@ApiOperation(value = "更新字典")
 	@SysLogs("更新字典")
 	@ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-	public ResponseResult update(@RequestBody @Validated @ApiParam(value = "字典更新数据") DictUpdateDTO dictUpdateDTO){
+	public ResponseResult<String> update(@RequestBody @Validated @ApiParam(value = "字典更新数据") DictUpdateDTO dictUpdateDTO){
 		sysDictService.updateDictItem(dictUpdateDTO);
 		return ResponseResult.e(ResponseCode.OK);
 	}
@@ -77,7 +79,7 @@ public class SysDictController {
 	@ApiOperation("删除字典项")
 	@SysLogs("删除字典项")
 	@ApiImplicitParam(paramType = "header", name = "Authorization", value = "身份认证Token")
-	public ResponseResult remove(@PathVariable("id") @ApiParam("字典项ID") String id) {
+	public ResponseResult<String> remove(@PathVariable("id") @ApiParam("字典项ID") String id) {
 		sysDictService.removeDictItem(id);
 		return ResponseResult.e(ResponseCode.OK);
 	}
@@ -86,7 +88,7 @@ public class SysDictController {
 	@ApiOperation(value = "判断字典项是否存在")
 	@SysLogs("判断字典项是否存在")
 	@ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-	public ResponseResult existsDict(@RequestBody @Validated @ApiParam(value = "字典数据") DictExistsQueryDTO existsQueryDTO){
+	public ResponseResult<Boolean> existsDict(@RequestBody @Validated @ApiParam(value = "字典数据") DictExistsQueryDTO existsQueryDTO){
 		return ResponseResult.e(ResponseCode.OK,sysDictService.existsDict(existsQueryDTO));
 	}
 
@@ -94,7 +96,7 @@ public class SysDictController {
 	@ApiOperation(value = "获取字典分类列表")
 	@SysLogs("获取字典分类列表")
 	@ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-	public ResponseResult findDictClassList(@RequestBody @Validated @ApiParam(value = "字典分类查询条件") FindClassVO findCatalogueVO){
+	public ResponseResult<List<DictClassVO>> findDictClassList(@RequestBody @Validated @ApiParam(value = "字典分类查询条件") FindClassVO findCatalogueVO){
 		return ResponseResult.e(ResponseCode.OK,sysDictService.findDictClassList(findCatalogueVO));
 	}
 
@@ -102,7 +104,7 @@ public class SysDictController {
 	@ApiOperation(value = "添加字典分类")
 	@SysLogs("添加字典分类")
 	@ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-	public ResponseResult addClass(@RequestBody @Validated @ApiParam(value = "字典分类新增数据") DictClassAddVO dictClassAddVO){
+	public ResponseResult<String> addClass(@RequestBody @Validated @ApiParam(value = "字典分类新增数据") DictClassAddVO dictClassAddVO){
 		sysDictService.addDictClass(dictClassAddVO);
 		return ResponseResult.e(ResponseCode.OK);
 	}
@@ -111,7 +113,7 @@ public class SysDictController {
 	@ApiOperation(value = "更新字典分类")
 	@SysLogs("更新字典分类")
 	@ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-	public ResponseResult updateClass(@RequestBody @Validated @ApiParam(value = "字典分类更新数据") DictClassUpdateVO dictClassUpdateVO){
+	public ResponseResult<String> updateClass(@RequestBody @Validated @ApiParam(value = "字典分类更新数据") DictClassUpdateVO dictClassUpdateVO){
 		sysDictService.updateDictClass(dictClassUpdateVO);
 		return ResponseResult.e(ResponseCode.OK);
 	}
@@ -120,7 +122,7 @@ public class SysDictController {
 	@ApiOperation(value = "删除字典分类")
 	@SysLogs("删除字典分类")
 	@ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
-	public ResponseResult removeClass(@PathVariable("id") @ApiParam("字典分类ID") String id){
+	public ResponseResult<String> removeClass(@PathVariable("id") @ApiParam("字典分类ID") String id){
 		sysDictService.removeClass(id);
 		return ResponseResult.e(ResponseCode.OK);
 	}

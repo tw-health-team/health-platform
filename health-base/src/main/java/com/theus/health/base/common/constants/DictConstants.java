@@ -113,4 +113,36 @@ public class DictConstants {
             return name;
         }
     }
+
+
+
+    /**
+     * 解锁状态
+     */
+    public enum UnLockStatus {
+        /**
+         * 锁定
+         */
+        NO(0, "锁定"),
+        /**
+         * 解锁
+         */
+        YES(1, "解锁");
+
+        UnLockStatus(Integer value, String name) {
+            this.value = value;
+            this.name = name;
+        }
+
+        private final Integer value;
+        private final String name;
+
+        public Integer getValue() {
+            return value;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
 }

@@ -2,6 +2,7 @@ package com.theus.health.base.controller.system;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.theus.health.base.common.annotation.SysLogs;
+import com.theus.health.base.common.constants.DictConstants;
 import com.theus.health.base.model.dto.system.user.*;
 import com.theus.health.base.model.po.system.SysUser;
 import com.theus.health.base.service.system.SysUserService;
@@ -50,7 +51,7 @@ public class SysUserController {
     @SysLogs("锁定用户")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
     public ResponseResult<String> lock(@PathVariable("id") @ApiParam(value = "用户标识ID") String id){
-        sysUserService.statusChange(id, 0);
+        sysUserService.statusChange(id, DictConstants.UnLockStatus.NO.getValue());
         return ResponseResult.e(ResponseCode.OK);
     }
 
@@ -59,7 +60,7 @@ public class SysUserController {
     @SysLogs("解锁用户")
     @ApiImplicitParam(paramType = "header",name = "Authorization",value = "身份认证Token")
     public ResponseResult<String> unlock(@PathVariable("id") @ApiParam(value = "用户标识ID") String id){
-        sysUserService.statusChange(id, 1);
+        sysUserService.statusChange(id, DictConstants.UnLockStatus.YES.getValue());
         return ResponseResult.e(ResponseCode.OK);
     }
 

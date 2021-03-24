@@ -184,7 +184,9 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
                 }
             }
             allOrgans.remove(organ);
-            parentList.add(organ);
+            if (organ != null) {
+                parentList.add(organ);
+            }
             // 获取子集
             List<SysOrgan> childList = this.getChildList(parentList, new ArrayList<>(), new HashMap<>(20), allOrgans);
             parentList.addAll(childList);
@@ -249,9 +251,11 @@ public class SysOrganServiceImpl extends ServiceImpl<SysOrganMapper, SysOrgan> i
                 Iterator<SysOrgan> iterator = allOrgans.iterator();
                 while (iterator.hasNext()) {
                     SysOrgan resource = iterator.next();
-                    // TODO 20201010 parentId 是否改为 resource.getId() 待验证
+                    // 20201010 parentId 是否改为 resource.getId() 待验证
+                    // 20210225 确认修改(循环的机构代码不在过滤的集合中 即未被添加到结果中，则判断他的上机构代码是否等于parentId，
+                    // 如果等于说明是其下级机构 则添加到结果中）
                     // 获取子资源
-                    if (!filteredMap.containsKey(parentId) && parentId.equals(resource.getParentId())) {
+                    if (!filteredMap.containsKey(resource.getId()) && parentId.equals(resource.getParentId())) {
                         // 存储获取到的子集
                         filteredMap.put(resource.getId(), resource);
                         // 保存结果集
